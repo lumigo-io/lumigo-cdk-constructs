@@ -182,6 +182,71 @@ describe('Lambda tracing injection', () => {
 
   describe('with Lumigo as aspect to the entire application', () => {
 
+    describe('using W3C TraceContext propagation with', () => {
+
+      test('a Node.js function', () => {
+        const app = new App();
+
+        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+          lambdaEnableW3CTraceContext: true,
+        });
+
+        const root = new NodejsTestStack(app, 'NodejsTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+        });
+
+        app.synth();
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f._layers).toHaveLength(1);
+        expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:')).toBe(true);
+
+        /* eslint-disable */
+        expect(f['environment']['AWS_LAMBDA_EXEC_WRAPPER']).toEqual({
+          value: '/opt/lumigo_wrapper',
+        });
+        expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+        expect(f['environment']['LUMIGO_PROPAGATE_W3C']).toEqual({
+          value: 'true',
+        });
+        /* eslint-enable */
+      });
+
+      test('a Python function', () => {
+        const app = new App();
+
+        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+          lambdaEnableW3CTraceContext: true,
+        });
+
+        const root = new PythonTestStack(app, 'PythonTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+        });
+
+        app.synth();
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f._layers).toHaveLength(1);
+        expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-python-tracer:')).toBe(true);
+
+        /* eslint-disable */
+        expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+        expect(f['environment']['LUMIGO_PROPAGATE_W3C']).toEqual({
+          value: 'true',
+        });
+        /* eslint-enable */
+      });
+
+    });
+
     describe('using the pinned layers with', () => {
 
       test('a Node.js function', () => {

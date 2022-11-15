@@ -195,6 +195,48 @@ export class MyNodejsLambdaStack extends Stack {
 }
 ```
 
+### W3C TraceContext propagation in AWS Lambda
+
+To be able to trace scenarios in which a Lambda function sends HTTP requests to an application instrumented with OpenTelemetry, like those using the [Lumigo OpenTelemetry Distro for JS](https://github.com/lumigo-io/opentelemetry-js-distro) and [Lumigo OpenTelemetry Distro for Python](https://github.com/lumigo-io/opentelemetry-python-distro) or other OpenTelemetry SDKs, the Lumigo Node.js and Python tracers can optionally add [W3C TraceContext](https://www.w3.org/TR/trace-context/) HTTP headers to outgoing requests.
+
+Aty the tracer level, the support of W3C TraceContext is currently opt-in via the `LUMIGO_PROPAGATE_W3C=true` environment variable.
+But the Lumigo CDK integration can apply it to all your Lambda functions:
+
+```typescript
+import { Lumigo } from 'lumigo-cdk2-alpha';
+import { App, SecretValue } from 'aws-cdk-lib';
+
+const app = new App();
+
+// Add here stacks and constructs
+
+new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(app, {
+    lambdaEnableW3CTraceContext: true, // <--- This parameter set to true activates the W3C TraceContext propagation for all supported Lambda functions
+});
+
+app.synth();
+```
+
+Activating W3C TraceContext support is also supported on a function-by-function basis:
+
+```typescript
+export class MyNodejsLambdaStack extends Stack {
+  constructor(scope: Construct, id: string, props: LumigoStackProps) {
+    super(scope, id, props);
+
+    const handler = new Function(this, 'MyLambda', {
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.NODEJS_14_X,
+    });
+
+    props.lumigo.traceLambda(handler, {
+      enableW3CTraceContext: true,  // <--- This parameter set to true activates the W3C TraceCntext propagation for this Lambda function.
+    });
+  }
+}
+```
+
 ## Supported Constructs
 
 The Lumigo CDK integration applies autotrace to the following constructs by adding a Lambda layer containing the right tracer for the Lambda function runtime, and environment variables:

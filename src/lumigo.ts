@@ -16,10 +16,12 @@ export interface LumigoProps {
 export interface LumigoAspectProps {
   readonly lambdaNodejsLayerVersion?: Number;
   readonly lambdaPythonLayerVersion?: Number;
+  readonly lambdaEnableW3CTraceContext?: Boolean;
 }
 
 export interface TraceLambdaProps {
   readonly layerVersion?: Number;
+  readonly enableW3CTraceContext?: Boolean;
 }
 
 // Layer type to layer name
@@ -31,6 +33,8 @@ enum LambdaLayerType {
 const AWS_LAMBDA_EXEC_WRAPPER_ENV_VAR_NAME = 'AWS_LAMBDA_EXEC_WRAPPER';
 
 const AWS_LAMBDA_EXEC_WRAPPER_ENV_VAR_VALUE = '/opt/lumigo_wrapper';
+
+const LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME = 'LUMIGO_PROPAGATE_W3C';
 
 const LUMIGO_TRACER_TOKEN_ENV_VAR_NAME = 'LUMIGO_TRACER_TOKEN';
 
@@ -93,6 +97,7 @@ export class Lumigo {
 
             lumigo.traceLambda(construct, {
               layerVersion,
+              enableW3CTraceContext: props.lambdaEnableW3CTraceContext === true,
             });
           } catch (e) {
             if (e instanceof UnsupportedLambdaRuntimeError) {
@@ -124,6 +129,12 @@ export class Lumigo {
       lambda.addEnvironment(AWS_LAMBDA_EXEC_WRAPPER_ENV_VAR_NAME, AWS_LAMBDA_EXEC_WRAPPER_ENV_VAR_VALUE);
 
       lambda.node.addValidation(new HasAwsLambdaExecWrapperEnvVarValidation(lambda));
+    }
+
+    if (props.enableW3CTraceContext === true) {
+      lambda.addEnvironment(LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME, String(true));
+
+      lambda.node.addValidation(new HasLumigoPropagateW3CEnvVarValidation(lambda));
     }
 
     this.info(lambda, 'This function has been modified to add Lumigo autotracing.');
@@ -248,6 +259,40 @@ class HasAwsLambdaExecWrapperEnvVarValidation implements IValidation {
 
     if (value !== AWS_LAMBDA_EXEC_WRAPPER_ENV_VAR_VALUE) {
       return [`The '${AWS_LAMBDA_EXEC_WRAPPER_ENV_VAR_NAME}' environment variable has a different value than the expected '${AWS_LAMBDA_EXEC_WRAPPER_ENV_VAR_VALUE}'.`];
+    }
+
+    return [];
+  }
+
+}
+
+class HasLumigoPropagateW3CEnvVarValidation implements IValidation {
+
+  private readonly lambda: SupportedFunction;
+
+  constructor(lambda: SupportedFunction) {
+    this.lambda = lambda;
+  }
+
+  public validate(): string[] {
+    /* eslint-disable */
+    const environment = this.lambda['environment'];
+    /* eslint-enable */
+
+    if (!environment) {
+      return ['No \'environment\' property found on this Lambda; consider upgrading your \'@lumigo/cdk2\' package.'];
+    }
+
+    if (!environment[LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME]) {
+      return [`The '${LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME}' environment variable is not set.`];
+    }
+
+    const {
+      'value': value,
+    } = environment[LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME];
+
+    if (value !== 'true') {
+      return [`The '${LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME}' environment variable has a different value than the expected 'true'.`];
     }
 
     return [];
