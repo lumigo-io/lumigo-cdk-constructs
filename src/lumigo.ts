@@ -196,7 +196,7 @@ class HasLumigoTracerEnvVarValidation implements IValidation {
   }
 
   public validate(): string[] {
-    const environment = this.lambda.environment;
+    const environment = this.lambda['environment'];  //
 
     if (!environment) {
       return ['No \'environment\' property found on this Lambda; consider upgrading your \'@lumigo/cdk2\' package.'];
@@ -228,7 +228,7 @@ class HasAwsLambdaExecWrapperEnvVarValidation implements IValidation {
   }
 
   public validate(): string[] {
-    const environment = this.lambda.environment;
+    const environment = this.lambda['environment'];  // 
 
     if (!environment) {
       return ['No \'environment\' property found on this Lambda; consider upgrading your \'@lumigo/cdk2\' package.'];
