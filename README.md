@@ -155,14 +155,50 @@ app.synth();
 ### Lambda Layer Version Pinning
 
 Unless specified otherwise, when instrumenting a Lambda function, the Lumigo CDK integration will use the latest known Lambda layer at the moment of publishing the Lumigo CDK integration version.
-(It is considered bad practice in CDK Construct designs to have API calls take place inside the `synth` phase.)
+(It is considered bad practice in CDK Construct designs to have API calls take place inside the `synth` phase, so new versions of the `lumigo-cdk2-alpha` will regularly be released, pointing at the latest layers.)
 
-TODO
+The pinning of specific layer versions can be performed at the level of the entire application or stack:
+
+```typescript
+import { Lumigo } from 'lumigo-cdk2-alpha';
+import { App, SecretValue } from 'aws-cdk-lib';
+
+const app = new App();
+
+// Add here stacks and constructs
+
+new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(app, {
+    lambdaNodejsLayerVersion: 42,  // All Lambda functions with a supported Node.js runtime will use the layer v42
+    lambdaPythonLayerVersion: 1,  // All Lambda functions with a supported Python runtime will use the layer v1
+});
+
+app.synth();
+```
+
+Layer-version pinning can also be done function-by-function:
+
+```typescript
+export class MyNodejsLambdaStack extends Stack {
+  constructor(scope: Construct, id: string, props: LumigoStackProps) {
+    super(scope, id, props);
+
+    const handler = new Function(this, 'MyLambda', {
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.NODEJS_14_X,
+    });
+
+    props.lumigo.traceLambda(handler, {
+      layerVersion: 42,  // Which layer this is about (Node.js? Python?) is contextual to the `runtime` of the function
+    });
+  }
+}
+```
 
 ## Supported Constructs
 
 The Lumigo CDK integration applies autotrace to the following constructs by adding a Lambda layer containing the right tracer for the Lambda function runtime, and environment variables:
 
-* [`Function`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda.Function.html) from the [`aws-cdk-lib/aws-lambda`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda-readme.html) package
-* [`NodejsFunction`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda_nodejs.NodejsFunction.html) from the [`aws-cdk-lib/aws-lambda-nodejs`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda_nodejs-readme.html) package
-* [`PythonFunction`](https://docs.aws.amazon.com/cdk/api/v2/docs/@aws-cdk_aws-lambda-python-alpha.PythonFunction.html) from the [`@aws-cdk/aws-lambda-python-alpha`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-lambda-python-alpha-readme.html) package
+* [`Function`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda.Function.html) from the [`aws-cdk-lib/aws-lambda`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda-readme.html) package.
+* [`NodejsFunction`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda_nodejs.NodejsFunction.html) from the [`aws-cdk-lib/aws-lambda-nodejs`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda_nodejs-readme.html) package.
+* [`PythonFunction`](https://docs.aws.amazon.com/cdk/api/v2/docs/@aws-cdk_aws-lambda-python-alpha.PythonFunction.html) from the [`@aws-cdk/aws-lambda-python-alpha`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-lambda-python-alpha-readme.html) package.

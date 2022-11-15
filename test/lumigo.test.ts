@@ -146,123 +146,217 @@ export class NodejsTestOverrideLumigoLayerStack extends Stack {
   }
 }
 
+export class NodejsTestSingleLambdaPinnedLayerVersionStack extends Stack {
+  constructor(scope: Construct, id: string, props: LumigoStackProps) {
+    super(scope, id, props);
+
+    const handler = new Function(this, 'MyLambda', {
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.NODEJS_14_X,
+    });
+
+    props.lumigo.traceLambda(handler, {
+      layerVersion: 42,
+    });
+  }
+}
+
+export class PythonTestSingleLambdaPinnedLayerVersionStack extends Stack {
+  constructor(scope: Construct, id: string, props: LumigoStackProps) {
+    super(scope, id, props);
+
+    const handler = new Function(this, 'MyLambda', {
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.PYTHON_3_9,
+    });
+
+    props.lumigo.traceLambda(handler, {
+      layerVersion: 42,
+    });
+  }
+}
+
 describe('Lambda tracing injection', () => {
 
-  describe('with Lumigo as aspect to the entire application containing', () => {
+  describe('with Lumigo as aspect to the entire application', () => {
 
-    test('a Node.js function', () => {
-      const app = new App();
+    describe('using the pinned layers with', () => {
 
-      new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app);
+      test('a Node.js function', () => {
+        const app = new App();
 
-      const root = new NodejsTestStack(app, 'NodejsTestStack', {
-        env: {
-          region: 'eu-central-1',
-        },
-      });
+        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+          lambdaNodejsLayerVersion: 1,
+        });
 
-      app.synth();
+        const root = new NodejsTestStack(app, 'NodejsTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+        });
 
-      expect(root.node.children[0]).toBeInstanceOf(Function);
-      const f = root.node.children[0] as Function;
-
-      expect(f._layers).toHaveLength(1);
-      expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:'));
-
-      /* eslint-disable */
-      expect(f['environment']['AWS_LAMBDA_EXEC_WRAPPER']).toEqual({
-        value: '/opt/lumigo_wrapper',
-      });
-      expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
-      /* eslint-enable */
-    });
-
-    test('a Node.js function with an Alias', () => {
-      const app = new App();
-
-      new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app);
-
-      const root = new NodejsAliasTestStack(app, 'NodejsTestStack', {
-        env: {
-          region: 'eu-central-1',
-        },
-      });
-
-      app.synth();
-
-      expect(root.node.children[0]).toBeInstanceOf(Function);
-      const f = root.node.children[0] as Function;
-
-      expect(f._layers).toHaveLength(1);
-      expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:'));
-
-      /* eslint-disable */
-      expect(f['environment']['AWS_LAMBDA_EXEC_WRAPPER']).toEqual({
-        value: '/opt/lumigo_wrapper',
-      });
-      expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
-      /* eslint-enable */
-    });
-
-    test('an already-traced Node.js function', () => {
-      const app = new App();
-      const lumigo = new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') });
-
-      lumigo.traceEverything(app);
-
-      new NodejsTestSingleLambdaStack(app, 'NodejsTestStack', {
-        env: {
-          region: 'eu-central-1',
-        },
-        lumigo,
-      });
-
-      expect(() => {
         app.synth();
-      }).toThrowError(/There is already a Construct with name 'LumigoLayer' in Function/);
-    });
 
-    test('a Python function', () => {
-      const app = new App();
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
 
-      new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app);
+        expect(f._layers).toHaveLength(1);
+        expect(f._layers[0].layerVersionArn).toEqual('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:1');
 
-      const root = new PythonTestStack(app, 'PythonTestStack', {
-        env: {
-          region: 'eu-central-1',
-        },
+        /* eslint-disable */
+        expect(f['environment']['AWS_LAMBDA_EXEC_WRAPPER']).toEqual({
+          value: '/opt/lumigo_wrapper',
+        });
+        expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+        /* eslint-enable */
       });
 
-      app.synth();
+      test('a Python function', () => {
+        const app = new App();
 
-      expect(root.node.children[0]).toBeInstanceOf(Function);
-      const f = root.node.children[0] as Function;
+        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+          lambdaPythonLayerVersion: 1,
+        });
 
-      expect(f._layers).toHaveLength(1);
-      expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-python-tracer:'));
+        const root = new PythonTestStack(app, 'PythonTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+        });
 
-      /* eslint-disable */
-      expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
-      /* eslint-enable */
-    });
-
-    test('an already-traced Python function', () => {
-      const app = new App();
-
-      const lumigo = new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') });
-
-      lumigo.traceEverything(app);
-
-      new PythonTestSingleLambdaStack(app, 'PythonTestStack', {
-        env: {
-          region: 'eu-central-1',
-        },
-        lumigo,
-      });
-
-      expect(() => {
         app.synth();
-      }).toThrowError(/There is already a Construct with name 'LumigoLayer' in Function/);
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f._layers).toHaveLength(1);
+        expect(f._layers[0].layerVersionArn).toEqual('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-python-tracer:1');
+
+        /* eslint-disable */
+        expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+        /* eslint-enable */
+      });
+
+    });
+
+    describe('using the latest layers with', () => {
+
+      test('a Node.js function', () => {
+        const app = new App();
+
+        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app);
+
+        const root = new NodejsTestStack(app, 'NodejsTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+        });
+
+        app.synth();
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f._layers).toHaveLength(1);
+        expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:'));
+
+        /* eslint-disable */
+        expect(f['environment']['AWS_LAMBDA_EXEC_WRAPPER']).toEqual({
+          value: '/opt/lumigo_wrapper',
+        });
+        expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+        /* eslint-enable */
+      });
+
+      test('a Node.js function with an Alias', () => {
+        const app = new App();
+
+        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app);
+
+        const root = new NodejsAliasTestStack(app, 'NodejsTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+        });
+
+        app.synth();
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f._layers).toHaveLength(1);
+        expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:'));
+
+        /* eslint-disable */
+        expect(f['environment']['AWS_LAMBDA_EXEC_WRAPPER']).toEqual({
+          value: '/opt/lumigo_wrapper',
+        });
+        expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+        /* eslint-enable */
+      });
+
+      test('an already-traced Node.js function', () => {
+        const app = new App();
+        const lumigo = new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') });
+
+        lumigo.traceEverything(app);
+
+        new NodejsTestSingleLambdaStack(app, 'NodejsTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+          lumigo,
+        });
+
+        expect(() => {
+          app.synth();
+        }).toThrowError(/There is already a Construct with name 'LumigoLayer' in Function/);
+      });
+
+      test('a Python function', () => {
+        const app = new App();
+
+        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app);
+
+        const root = new PythonTestStack(app, 'PythonTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+        });
+
+        app.synth();
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f._layers).toHaveLength(1);
+        expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-python-tracer:'));
+
+        /* eslint-disable */
+        expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+        /* eslint-enable */
+      });
+
+      test('an already-traced Python function', () => {
+        const app = new App();
+
+        const lumigo = new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') });
+
+        lumigo.traceEverything(app);
+
+        new PythonTestSingleLambdaStack(app, 'PythonTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+          lumigo,
+        });
+
+        expect(() => {
+          app.synth();
+        }).toThrowError(/There is already a Construct with name 'LumigoLayer' in Function/);
+      });
     });
 
   });
@@ -314,6 +408,55 @@ describe('Lambda tracing injection', () => {
 
       expect(f._layers).toHaveLength(1);
       expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-python-tracer:'));
+
+      /* eslint-disable */
+      expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+      /* eslint-enable */
+    });
+
+    test('a single Node.js function with layer version pinning', () => {
+      const app = new App();
+
+      const root = new NodejsTestSingleLambdaPinnedLayerVersionStack(app, 'NodejsTestStack', {
+        env: {
+          region: 'eu-central-1',
+        },
+        lumigo,
+      });
+
+      app.synth();
+
+      expect(root.node.children[0]).toBeInstanceOf(Function);
+      const f = root.node.children[0] as Function;
+
+      expect(f._layers).toHaveLength(1);
+      expect(f._layers[0].layerVersionArn).toEqual('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:42');
+
+      /* eslint-disable */
+      expect(f['environment']['AWS_LAMBDA_EXEC_WRAPPER']).toEqual({
+        value: '/opt/lumigo_wrapper',
+      });
+      expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+      /* eslint-enable */
+    });
+
+    test('a single Python function with layer version pinning', () => {
+      const app = new App();
+
+      const root = new PythonTestSingleLambdaPinnedLayerVersionStack(app, 'PythonTestStack', {
+        env: {
+          region: 'eu-central-1',
+        },
+        lumigo,
+      });
+
+      app.synth();
+
+      expect(root.node.children[0]).toBeInstanceOf(Function);
+      const f = root.node.children[0] as Function;
+
+      expect(f._layers).toHaveLength(1);
+      expect(f._layers[0].layerVersionArn).toEqual('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-python-tracer:42');
 
       /* eslint-disable */
       expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
