@@ -1,5 +1,5 @@
 {
-  "name": "@lumigo/cdk2",
+  "name": "lumigo-cdk2-alpha",
   "repository": {
     "type": "git",
     "url": "https://github.com/michelem/lumigo-cdk-constructs.git"

@@ -1,32 +1,30 @@
+import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
 import { App, Annotations, IAspect, SecretValue, Stack, Aspects } from 'aws-cdk-lib';
 import { Function, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
 import { IConstruct, IValidation } from 'constructs';
-import {
-  SupportedNodejsRegions,
-  LATEST_NODEJS_LAYER_VERSION_BY_REGION,
-} from './lambda_nodejs_layers';
-import {
-  SupportedPythonRegions,
-  LATEST_PYTHON_LAYER_VERSION_BY_REGION,
-} from './lambda_python_layers';
+
+import * as lambdaLayersNodejs from './lambda_layers_nodejs.json';
+import * as lambdaLayersPython from './lambda_layers_python.json';
 
 type SupportedFunction = Function | NodejsFunction | PythonFunction;
 
 export interface LumigoProps {
-
   readonly lumigoToken: SecretValue;
-
 }
 
-export interface LambdaProps {
+export interface LumigoAspectProps {
+  readonly lambdaNodejsLayerVersion?: Number;
+  readonly lambdaPythonLayerVersion?: Number;
+}
+
+export interface TraceLambdaProps {
   readonly layerVersion?: Number;
 }
 
 // Layer type to layer name
 enum LambdaLayerType {
-  NODEJS = 'lumigo-node-tracer',
+  NODE = 'lumigo-node-tracer',
   PYTHON = 'lumigo-python-tracer',
 }
 
@@ -40,7 +38,7 @@ const LUMIGO_TRACER_TOKEN_ENV_VAR_NAME = 'LUMIGO_TRACER_TOKEN';
  * TODO: Document tracing functions one-by-one
  * TODO: Document using as Aspect to trace all functions
  */
-export class Lumigo implements IAspect {
+export class Lumigo {
 
   props: LumigoProps;
 
@@ -74,15 +72,45 @@ export class Lumigo implements IAspect {
     Annotations.of(node).addWarning(message);
   }
 
-  public traceEverything(root: App | Stack) {
-    Aspects.of(root).add(this);
+  public traceEverything(root: App | Stack, props: LumigoAspectProps = {}) {
+    Aspects.of(root).add(this.asAspect(props));
   }
 
-  public traceLambda(lambda: SupportedFunction, props: LambdaProps = {}) {
+  public asAspect(props: LumigoAspectProps): IAspect {
+    const lumigo = this;
+    return <IAspect>{
+      visit: function(construct: IConstruct): void {
+        if (construct instanceof Function) {
+          try {
+            const layerType = lumigo.getLayerType(construct);
+
+            var layerVersion;
+            if (layerType === LambdaLayerType.NODE) {
+              layerVersion = props.lambdaNodejsLayerVersion;
+            } else if (layerType === LambdaLayerType.PYTHON) {
+              layerVersion = props.lambdaPythonLayerVersion;
+            }
+
+            lumigo.traceLambda(construct, {
+              layerVersion,
+            });
+          } catch (e) {
+            if (e instanceof UnsupportedLambdaRuntimeError) {
+              lumigo.info(construct, `The '${e.unsupportedRuntime}' cannot be automatically traced by Lumigo.`);
+            } else {
+              throw e;
+            }
+          }
+        }
+      },
+    };
+  }
+
+  public traceLambda(lambda: SupportedFunction, props: TraceLambdaProps = {}) {
     // TODO Add warning old layer
     const layerType = this.getLayerType(lambda);
 
-    const region = Stack.of(lambda).region
+    const region = Stack.of(lambda).region;
 
     const layerVersion = props.layerVersion || this.getLayerLatestVersion(region, layerType);
 
@@ -92,22 +120,22 @@ export class Lumigo implements IAspect {
     lambda.node.addValidation(new HasExactlyOneLumigoLayerValidation(lambda));
     lambda.node.addValidation(new HasLumigoTracerEnvVarValidation(lambda));
 
-    if (layerType === LambdaLayerType.NODEJS) {
+    if (layerType === LambdaLayerType.NODE) {
       lambda.addEnvironment(AWS_LAMBDA_EXEC_WRAPPER_ENV_VAR_NAME, AWS_LAMBDA_EXEC_WRAPPER_ENV_VAR_VALUE);
 
       lambda.node.addValidation(new HasAwsLambdaExecWrapperEnvVarValidation(lambda));
     }
 
-    this.info(lambda, 'This function has been modified to add Lumigo autotracing.')
+    this.info(lambda, 'This function has been modified to add Lumigo autotracing.');
   }
 
   private getLayerType(lambda: SupportedFunction): LambdaLayerType {
-    switch(lambda.runtime) {
+    switch (lambda.runtime) {
       case Runtime.NODEJS_10_X:
       case Runtime.NODEJS_12_X:
       case Runtime.NODEJS_14_X:
       case Runtime.NODEJS_16_X:
-        return LambdaLayerType.NODEJS;
+        return LambdaLayerType.NODE;
       case Runtime.PYTHON_3_7:
       case Runtime.PYTHON_3_8:
       case Runtime.PYTHON_3_9:
@@ -118,24 +146,14 @@ export class Lumigo implements IAspect {
   }
 
   private getLayerLatestVersion(region: string, type: LambdaLayerType): Number {
-    switch(type) {
-      case LambdaLayerType.NODEJS:
-        const latestNodejsVersion = LATEST_NODEJS_LAYER_VERSION_BY_REGION.get(region as SupportedNodejsRegions);
+    const latestLayerVersionMap = (type === LambdaLayerType.NODE ? lambdaLayersNodejs : lambdaLayersPython);
+    const latestLayerVersion = (new Map(Object.entries(latestLayerVersionMap))).get(region);
 
-        if (!latestNodejsVersion) {
-          throw new UnsupportedLambdaLayerRegion(type, region);
-        }
+    if (!latestLayerVersion) {
+      throw new UnsupportedLambdaLayerRegion(type, region);
+    }
 
-        return latestNodejsVersion;
-      case LambdaLayerType.PYTHON:
-        const latestPythonVersion = LATEST_PYTHON_LAYER_VERSION_BY_REGION.get(region as SupportedPythonRegions);
-
-        if (!latestPythonVersion) {
-          throw new UnsupportedLambdaLayerRegion(type, region);
-        }
-
-        return latestPythonVersion;
-      }
+    return latestLayerVersion;
   }
 
 }
@@ -149,12 +167,12 @@ class HasExactlyOneLumigoLayerValidation implements IValidation {
   }
 
   public validate(): string[] {
-    const layers = this.lambda['_layers'];
+    const layers = this.lambda._layers;
 
     if (!layers) {
       return ['The function does not have the Lumigo layer installed.'];
     }
-    
+
     const lumigoLayerArns = layers
       .map(layer => layer as LayerVersion)
       .filter(layer => layer.layerVersionArn.startsWith(`arn:aws:lambda:${this.lambda.env.region!}:114300393969:layer:`))
@@ -178,7 +196,7 @@ class HasLumigoTracerEnvVarValidation implements IValidation {
   }
 
   public validate(): string[] {
-    const environment = this.lambda['environment'];
+    const environment = this.lambda.environment;
 
     if (!environment) {
       return ['No \'environment\' property found on this Lambda; consider upgrading your \'@lumigo/cdk2\' package.'];
@@ -210,7 +228,7 @@ class HasAwsLambdaExecWrapperEnvVarValidation implements IValidation {
   }
 
   public validate(): string[] {
-    const environment = this.lambda['environment'];
+    const environment = this.lambda.environment;
 
     if (!environment) {
       return ['No \'environment\' property found on this Lambda; consider upgrading your \'@lumigo/cdk2\' package.'];

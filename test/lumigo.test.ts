@@ -1,7 +1,7 @@
-import { Lumigo } from '../src';
 import { App, SecretValue, Stack, StackProps } from 'aws-cdk-lib';
-import { Function, InlineCode, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Alias, Function, InlineCode, LayerVersion, Runtime, SingletonFunction } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
+import { Lumigo } from '../src';
 
 export class NodejsTestStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps = {}) {
@@ -23,6 +23,45 @@ export class PythonTestStack extends Stack {
       code: new InlineCode('foo'),
       handler: 'index.handler',
       runtime: Runtime.PYTHON_3_9,
+    });
+  }
+}
+
+export class NodejsAliasTestStack extends Stack {
+  constructor(scope: Construct, id: string, props: StackProps = {}) {
+    super(scope, id, props);
+
+    const func = new Function(this, 'MyLambda', {
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.NODEJS_14_X,
+    });
+
+    const version = func.currentVersion;
+    new Alias(this, 'MyLambdaAlias', {
+      aliasName: 'Alias1',
+      provisionedConcurrentExecutions: 42,
+      version,
+    });
+  }
+}
+
+export class SingletonFunctionTestStack extends Stack {
+  constructor(scope: Construct, id: string, props: StackProps = {}) {
+    super(scope, id, props);
+
+    new SingletonFunction(this, 'MyLambda1', {
+      uuid: 'af5f3e05-4361-4f78-bb0d-87198da1af99',
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.NODEJS_14_X,
+    });
+
+    new SingletonFunction(this, 'MyLambda2', {
+      uuid: 'af5f3e05-4361-4f78-bb0d-87198da1af99',
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.NODEJS_14_X,
     });
   }
 }
@@ -114,12 +153,12 @@ describe('Lambda tracing injection', () => {
     test('a Node.js function', () => {
       const app = new App();
 
-      new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(app);
+      new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app);
 
       const root = new NodejsTestStack(app, 'NodejsTestStack', {
         env: {
           region: 'eu-central-1',
-        }
+        },
       });
 
       app.synth();
@@ -130,10 +169,35 @@ describe('Lambda tracing injection', () => {
       expect(f._layers).toHaveLength(1);
       expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:'));
 
-      expect(f['environment']['AWS_LAMBDA_EXEC_WRAPPER']).toEqual({
-        'value': '/opt/lumigo_wrapper'
+      expect(f.environment.AWS_LAMBDA_EXEC_WRAPPER).toEqual({
+        value: '/opt/lumigo_wrapper',
       });
-      expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+      expect(f.environment.LUMIGO_TRACER_TOKEN).not.toBeNull();
+    });
+
+    test('a Node.js function with an Alias', () => {
+      const app = new App();
+
+      new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app);
+
+      const root = new NodejsAliasTestStack(app, 'NodejsTestStack', {
+        env: {
+          region: 'eu-central-1',
+        },
+      });
+
+      app.synth();
+
+      expect(root.node.children[0]).toBeInstanceOf(Function);
+      const f = root.node.children[0] as Function;
+
+      expect(f._layers).toHaveLength(1);
+      expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:'));
+
+      expect(f.environment.AWS_LAMBDA_EXEC_WRAPPER).toEqual({
+        value: '/opt/lumigo_wrapper',
+      });
+      expect(f.environment.LUMIGO_TRACER_TOKEN).not.toBeNull();
     });
 
     test('an already-traced Node.js function', () => {
@@ -157,12 +221,12 @@ describe('Lambda tracing injection', () => {
     test('a Python function', () => {
       const app = new App();
 
-      new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(app);
+      new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app);
 
       const root = new PythonTestStack(app, 'PythonTestStack', {
         env: {
           region: 'eu-central-1',
-        }
+        },
       });
 
       app.synth();
@@ -173,7 +237,7 @@ describe('Lambda tracing injection', () => {
       expect(f._layers).toHaveLength(1);
       expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-python-tracer:'));
 
-      expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+      expect(f.environment.LUMIGO_TRACER_TOKEN).not.toBeNull();
     });
 
     test('an already-traced Python function', () => {
@@ -199,7 +263,7 @@ describe('Lambda tracing injection', () => {
 
   describe('with Lumigo as aspect to a stack containing', () => {
 
-    const lumigo = new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')});
+    const lumigo = new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') });
 
     test('a single Node.js function', () => {
       const app = new App();
@@ -219,10 +283,10 @@ describe('Lambda tracing injection', () => {
       expect(f._layers).toHaveLength(1);
       expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:'));
 
-      expect(f['environment']['AWS_LAMBDA_EXEC_WRAPPER']).toEqual({
-        'value': '/opt/lumigo_wrapper'
+      expect(f.environment.AWS_LAMBDA_EXEC_WRAPPER).toEqual({
+        value: '/opt/lumigo_wrapper',
       });
-      expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+      expect(f.environment.LUMIGO_TRACER_TOKEN).not.toBeNull();
     });
 
     test('a single Python function', () => {
@@ -243,7 +307,7 @@ describe('Lambda tracing injection', () => {
       expect(f._layers).toHaveLength(1);
       expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-python-tracer:'));
 
-      expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+      expect(f.environment.LUMIGO_TRACER_TOKEN).not.toBeNull();
     });
 
   });
@@ -283,7 +347,7 @@ describe('Lambda tracing injection', () => {
         app.synth();
       }).toThrowError(/The 'AWS_LAMBDA_EXEC_WRAPPER' environment variable has a different value than the expected '\/opt\/lumigo_wrapper'/);
     });
-  
+
     test('the LUMIGO_TRACER_TOKEN env var', () => {
       const app = new App();
 

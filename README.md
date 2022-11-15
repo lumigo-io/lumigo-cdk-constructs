@@ -11,13 +11,13 @@ If instead of the AWS CDK v2, you are using the [Serverless Framework](https://w
 With `yarn`:
 
 ```sh
-yarn install '@lumigo/cdk2'
+yarn install 'lumigo-cdk2-alpha'
 ```
 
 With `npm`:
 
 ```sh
-npm install '@lumigo/cdk2'
+npm install 'lumigo-cdk2-alpha'
 ```
 
 ### Go
@@ -49,7 +49,7 @@ The only requirement to use the Lumigo CDK integration is to have the [Lumigo to
 The following code will apply Lumigo autotracing to all the [supported constructs](#supported-constructs):
 
 ```typescript
-import { Lumigo } from '@lumigo/cdk2';
+import { Lumigo } from 'lumigo-cdk2-alpha';
 import { App, SecretValue } from 'aws-cdk-lib';
 
 const app = new App();
@@ -64,14 +64,14 @@ app.synth();
 The `Lumigo.traceEverything` functionality is built using CDK [Aspects](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.Aspects.html), which can also be used directly as follows:
 
 ```typescript
-import { Lumigo } from '@lumigo/cdk2';
+import { Lumigo } from 'lumigo-cdk2-alpha';
 import { App, Aspects. SecretValue } from 'aws-cdk-lib';
 
 const app = new App();
 
 // Add here stacks and constructs
 
-Aspects.of(app).add(new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}));
+Aspects.of(app).add(new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).asAspect());
 
 app.synth();
 ```
@@ -81,7 +81,7 @@ app.synth();
 The following code will apply Lumigo autotracing to all the [supported constructs](#supported-constructs) in the instrumented stack:
 
 ```typescript
-import { Lumigo } from '@lumigo/cdk2';
+import { Lumigo } from 'lumigo-cdk2-alpha';
 import { App, SecretValue } from 'aws-cdk-lib';
 
 export class NodejsStack extends Stack {
@@ -115,7 +115,7 @@ app.synth();
 ### Instrumenting single functions
 
 ```typescript
-import { Lumigo } from '@lumigo/cdk2';
+import { Lumigo } from 'lumigo-cdk2-alpha';
 import { App, SecretValue } from 'aws-cdk-lib';
 
 interface NodejsStackProps extends StackProps {
@@ -152,6 +152,12 @@ const stack = new NodejsStack(app, 'NodejsTestStack', {
 app.synth();
 ```
 
+### Lambda Layer Version Pinning
+
+Unless specified otherwise, when instrumenting a Lambda function, the Lumigo CDK integration will use the latest known Lambda layer at the moment of publishing the Lumigo CDK integration version.
+(It is considered bad practice in CDK Construct designs to have API calls take place inside the `synth` phase.)
+
+TODO
 
 ## Supported Constructs
 
