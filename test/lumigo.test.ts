@@ -169,10 +169,12 @@ describe('Lambda tracing injection', () => {
       expect(f._layers).toHaveLength(1);
       expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:'));
 
+      /* eslint-disable */
       expect(f['environment']['AWS_LAMBDA_EXEC_WRAPPER']).toEqual({
         value: '/opt/lumigo_wrapper',
       });
       expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+      /* eslint-enable */
     });
 
     test('a Node.js function with an Alias', () => {
@@ -194,10 +196,12 @@ describe('Lambda tracing injection', () => {
       expect(f._layers).toHaveLength(1);
       expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:'));
 
+      /* eslint-disable */
       expect(f['environment']['AWS_LAMBDA_EXEC_WRAPPER']).toEqual({
         value: '/opt/lumigo_wrapper',
       });
       expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+      /* eslint-enable */
     });
 
     test('an already-traced Node.js function', () => {
@@ -237,7 +241,9 @@ describe('Lambda tracing injection', () => {
       expect(f._layers).toHaveLength(1);
       expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-python-tracer:'));
 
+      /* eslint-disable */
       expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+      /* eslint-enable */
     });
 
     test('an already-traced Python function', () => {
@@ -283,10 +289,12 @@ describe('Lambda tracing injection', () => {
       expect(f._layers).toHaveLength(1);
       expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:'));
 
+      /* eslint-disable */
       expect(f['environment']['AWS_LAMBDA_EXEC_WRAPPER']).toEqual({
         value: '/opt/lumigo_wrapper',
       });
       expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+      /* eslint-enable */
     });
 
     test('a single Python function', () => {
@@ -307,7 +315,9 @@ describe('Lambda tracing injection', () => {
       expect(f._layers).toHaveLength(1);
       expect(f._layers[0].layerVersionArn.startsWith('arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-python-tracer:'));
 
+      /* eslint-disable */
       expect(f['environment']['LUMIGO_TRACER_TOKEN']).not.toBeNull();
+      /* eslint-enable */
     });
 
   });
