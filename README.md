@@ -65,7 +65,7 @@ The `Lumigo.traceEverything` functionality is built using CDK [Aspects](https://
 
 ```typescript
 import { Lumigo } from 'lumigo-cdk2-alpha';
-import { App, Aspects. SecretValue } from 'aws-cdk-lib';
+import { App, Aspects, SecretValue } from 'aws-cdk-lib';
 
 const app = new App();
 
