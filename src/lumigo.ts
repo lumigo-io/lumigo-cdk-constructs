@@ -1,8 +1,11 @@
+import { dirname, join } from 'path';
 import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
-import { App, Annotations, IAspect, SecretValue, Stack, Aspects } from 'aws-cdk-lib';
+import { App, Annotations, IAspect, SecretValue, Stack, Aspects, Tags } from 'aws-cdk-lib';
 import { Function, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IConstruct, IValidation } from 'constructs';
+
+const { name, version } = require(join(dirname(__dirname), 'package.json'));
 
 import * as lambdaLayersNodejs from './lambda_layers_nodejs.json';
 import * as lambdaLayersPython from './lambda_layers_python.json';
@@ -137,7 +140,8 @@ export class Lumigo {
       lambda.node.addValidation(new HasLumigoPropagateW3CEnvVarValidation(lambda));
     }
 
-    this.info(lambda, 'This function has been modified to add Lumigo autotracing.');
+    Tags.of(lambda).add('lumigo:auto-trace', `${name}@${version}`);
+    this.info(lambda, `This function has been modified with Lumigo auto-tracing by the '${name}@${version}' package.`);
   }
 
   private getLayerType(lambda: SupportedFunction): LambdaLayerType {
