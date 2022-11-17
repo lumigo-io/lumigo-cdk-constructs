@@ -131,11 +131,11 @@ export class Lumigo {
                 const tags = (scope as any)['tags'];
                 /* eslint-enable */
                 if (!!tags && tags instanceof TagManager) {
-                  tags.setTag(LUMIGO_AUTOTRACE_TAG_NAME, LUMIGO_AUTOTRACE_TAG_VALUE);
+                  tags.setTag(LUMIGO_AUTOTRACE_TAG_NAME, LUMIGO_AUTOTRACE_TAG_VALUE, 100, true);
                 }
               }
             } catch (e) {
-
+              lumigo.warning(construct, `Cannot set the '${LUMIGO_AUTOTRACE_TAG_NAME}' tag to '${LUMIGO_AUTOTRACE_TAG_VALUE}'.`)
             }
           } catch (e) {
             if (e instanceof UnsupportedLambdaRuntimeError) {
