@@ -20,22 +20,6 @@ With `npm`:
 npm install 'lumigo-cdk2-alpha'
 ```
 
-### Go
-
-TODO
-
-### Java
-
-TODO
-
-### .NET
-
-TODO
-
-### Python
-
-TODO
-
 ## Usage
 
 The Lumigo CDK integration enables you to trace all the applicable constructs inside an CDK App or a Stack, as well on a function-by-function basis.
