@@ -185,7 +185,7 @@ class HasExactlyOneLumigoLayerValidation implements IValidation {
 
   public validate(): string[] {
     /* eslint-disable */
-    const layers: LayerVersion[]  = (this.lambda as any)['layers'];
+    const layers: LayerVersion[]  = (this.lambda as any)['_layers'];
     /* eslint-enable */
 
     if (!layers) {

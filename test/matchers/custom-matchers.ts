@@ -77,7 +77,7 @@ expect.extend({
     }
 
     /* eslint-disable */
-    const layers: LayerVersion[]  = (func as any)['layers'];
+    const layers: LayerVersion[]  = (func as any)['_layers'];
     const pass = (!!layers.find(l => l.layerVersionArn.startsWith(`arn:aws:lambda:${layer.region}:114300393969:layer:${layer.name}:`)));
     /* eslint-enable */
 
@@ -106,7 +106,7 @@ expect.extend({
     }
 
     /* eslint-disable */
-    const layers: LayerVersion[]  = (func as any)['layers'];
+    const layers: LayerVersion[]  = (func as any)['_layers'];
     const pass = (!!layers.find(l => l.layerVersionArn.startsWith(`arn:aws:lambda:${layer.region}:114300393969:layer:${layer.name}:${layer.version}`)));
     /* eslint-enable */
 
