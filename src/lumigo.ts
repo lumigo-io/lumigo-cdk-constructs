@@ -1,6 +1,6 @@
 import { dirname, join } from 'path';
 import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
-import { App, Annotations, IAspect, SecretValue, Stack, Aspects, Tags } from 'aws-cdk-lib';
+import { App, Annotations, IAspect, SecretValue, Stack, Aspects, Tags, TagManager } from 'aws-cdk-lib';
 import { Function, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IConstruct, IValidation } from 'constructs';
@@ -27,6 +27,7 @@ export interface LumigoAspectProps {
 export interface TraceLambdaProps {
   readonly layerVersion?: Number;
   readonly enableW3CTraceContext?: Boolean;
+  readonly applyAutoTraceTag?: Boolean;
 }
 
 // Layer type to layer name
@@ -42,6 +43,10 @@ const AWS_LAMBDA_EXEC_WRAPPER_ENV_VAR_VALUE = '/opt/lumigo_wrapper';
 const LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME = 'LUMIGO_PROPAGATE_W3C';
 
 const LUMIGO_TRACER_TOKEN_ENV_VAR_NAME = 'LUMIGO_TRACER_TOKEN';
+
+const LUMIGO_AUTOTRACE_TAG_NAME = 'lumigo:auto-trace';
+
+const LUMIGO_AUTOTRACE_TAG_VALUE = `${name}@${version}`;
 
 /**
  * TODO: Document tracing functions one-by-one
@@ -81,11 +86,15 @@ export class Lumigo {
     Annotations.of(node).addWarning(message);
   }
 
-  public traceEverything(root: App | Stack, props: LumigoAspectProps = {}) {
+  public traceEverything(root: App | Stack, props: LumigoAspectProps = {
+    lambdaEnableW3CTraceContext: false,
+  }) {
     Aspects.of(root).add(this.asAspect(props));
   }
 
-  public asAspect(props: LumigoAspectProps): IAspect {
+  public asAspect(props: LumigoAspectProps = {
+    lambdaEnableW3CTraceContext: false,
+  }): IAspect {
     const lumigo = this;
     return <IAspect>{
       visit: function(construct: IConstruct): void {
@@ -103,7 +112,31 @@ export class Lumigo {
             lumigo.traceLambda(construct, {
               layerVersion,
               enableW3CTraceContext: props.lambdaEnableW3CTraceContext === true,
+              /*
+               * Tags are implemented as aspects in CDK, and unfortunately aspects like
+               * this cannot apply other aspects.
+               */
+              applyAutoTraceTag: false,
             });
+
+            try {
+              /**
+               * To overcome the limitation that (1) tags are implemented as aspects, (2) that
+               * we are already inside an aspect and (3) an aspect cannot add aspects, we need
+               * to access the TagManager of the function and add the tag manually.
+               */
+              const scope = construct.node?.scope;
+              if (!!scope) {
+                /* eslint-disable */
+                const tags = (scope as any)['tags'];
+                /* eslint-enable */
+                if (!!tags && tags instanceof TagManager) {
+                  tags.setTag(LUMIGO_AUTOTRACE_TAG_NAME, LUMIGO_AUTOTRACE_TAG_VALUE);
+                }
+              }
+            } catch (e) {
+
+            }
           } catch (e) {
             if (e instanceof UnsupportedLambdaRuntimeError) {
               lumigo.info(construct, `The '${e.unsupportedRuntime}' cannot be automatically traced by Lumigo.`);
@@ -116,7 +149,10 @@ export class Lumigo {
     };
   }
 
-  public traceLambda(lambda: SupportedFunction, props: TraceLambdaProps = {}) {
+  public traceLambda(lambda: SupportedFunction, props: TraceLambdaProps = {
+    enableW3CTraceContext: false,
+    applyAutoTraceTag: true,
+  }) {
     // TODO Add warning old layer
     const layerType = this.getLayerType(lambda);
 
@@ -142,8 +178,11 @@ export class Lumigo {
       lambda.node.addValidation(new HasLumigoPropagateW3CEnvVarValidation(lambda));
     }
 
-    Tags.of(lambda).add('lumigo:auto-trace', `${name}@${version}`);
-    this.info(lambda, `This function has been modified with Lumigo auto-tracing by the '${name}@${version}' package.`);
+    if (props.applyAutoTraceTag === true) {
+      Tags.of(lambda).add(LUMIGO_AUTOTRACE_TAG_NAME, LUMIGO_AUTOTRACE_TAG_VALUE);
+    }
+
+    this.info(lambda, `This function has been modified with Lumigo auto-tracing by the '${LUMIGO_AUTOTRACE_TAG_VALUE}' package.`);
   }
 
   private getLayerType(lambda: SupportedFunction): LambdaLayerType {
@@ -185,7 +224,7 @@ class HasExactlyOneLumigoLayerValidation implements IValidation {
 
   public validate(): string[] {
     /* eslint-disable */
-    const layers: LayerVersion[]  = (this.lambda as any)['_layers'];
+    const layers: LayerVersion[] = (this.lambda as any)['_layers'];
     /* eslint-enable */
 
     if (!layers) {

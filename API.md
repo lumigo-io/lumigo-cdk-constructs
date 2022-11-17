@@ -95,8 +95,19 @@ const traceLambdaProps: TraceLambdaProps = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
+| <code><a href="#lumigo-cdk2-alpha.TraceLambdaProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | *No description.* |
 | <code><a href="#lumigo-cdk2-alpha.TraceLambdaProps.property.enableW3CTraceContext">enableW3CTraceContext</a></code> | <code>boolean</code> | *No description.* |
 | <code><a href="#lumigo-cdk2-alpha.TraceLambdaProps.property.layerVersion">layerVersion</a></code> | <code>number</code> | *No description.* |
+
+---
+
+##### `applyAutoTraceTag`<sup>Optional</sup> <a name="applyAutoTraceTag" id="lumigo-cdk2-alpha.TraceLambdaProps.property.applyAutoTraceTag"></a>
+
+```typescript
+public readonly applyAutoTraceTag: boolean;
+```
+
+- *Type:* boolean
 
 ---
 
@@ -160,10 +171,10 @@ new Lumigo(props: LumigoProps)
 ##### `asAspect` <a name="asAspect" id="lumigo-cdk2-alpha.Lumigo.asAspect"></a>
 
 ```typescript
-public asAspect(props: LumigoAspectProps): IAspect
+public asAspect(props?: LumigoAspectProps): IAspect
 ```
 
-###### `props`<sup>Required</sup> <a name="props" id="lumigo-cdk2-alpha.Lumigo.asAspect.parameter.props"></a>
+###### `props`<sup>Optional</sup> <a name="props" id="lumigo-cdk2-alpha.Lumigo.asAspect.parameter.props"></a>
 
 - *Type:* <a href="#lumigo-cdk2-alpha.LumigoAspectProps">LumigoAspectProps</a>
 
