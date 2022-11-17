@@ -5,7 +5,9 @@ import { Function, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { IConstruct, IValidation } from 'constructs';
 
+/* eslint-disable */
 const { name, version } = require(join(dirname(__dirname), 'package.json'));
+/* eslint-enable */
 
 import * as lambdaLayersNodejs from './lambda_layers_nodejs.json';
 import * as lambdaLayersPython from './lambda_layers_python.json';
@@ -182,14 +184,15 @@ class HasExactlyOneLumigoLayerValidation implements IValidation {
   }
 
   public validate(): string[] {
-    const layers = this.lambda._layers;
+    /* eslint-disable */
+    const layers: LayerVersion[]  = (this.lambda as any)['layers'];
+    /* eslint-enable */
 
     if (!layers) {
       return ['The function does not have the Lumigo layer installed.'];
     }
 
     const lumigoLayerArns = layers
-      .map(layer => layer as LayerVersion)
       .filter(layer => layer.layerVersionArn.startsWith(`arn:aws:lambda:${this.lambda.env.region!}:114300393969:layer:`))
       .map(layer => layer.layerVersionArn);
 

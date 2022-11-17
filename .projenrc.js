@@ -5,13 +5,19 @@ const project = new awscdk.AwsCdkConstructLibrary({
   cdkVersion: '2.24.0',
   defaultReleaseBranch: 'main',
   name: 'lumigo-cdk-constructs',
-  repositoryUrl: 'https://github.com/michelem/lumigo-cdk-constructs.git',
+  description: 'Home to the Lumigo constructs for the AWS Cloud Development Kit (AWS CDK)', /* The description is just a string that helps people understand the purpose of the package. */
+  repositoryUrl: 'https://github.com/lumigo-io/lumigo-cdk-constructs.git',
   /* Runtime dependencies of this module. */
   deps: [
     '@aws-cdk/aws-lambda-python-alpha@^2.24.0-alpha.0',
   ],
-  // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
-  // devDeps: [],             /* Build dependencies for this module. */
-  // packageName: undefined,  /* The "name" in package.json. */
+  peerDeps: [
+    '@aws-cdk/aws-lambda-python-alpha',
+  ],
+  /* Build dependencies for this module. */
+  devDeps: [
+    '@jest/globals',
+  ],
+  packageName: 'lumigo-cdk2-alpha', /* The "name" in package.json. */
 });
 project.synth();

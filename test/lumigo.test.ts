@@ -204,7 +204,9 @@ describe('Lambda tracing injection', () => {
         expect(root.node.children[0]).toBeInstanceOf(Function);
         const f = root.node.children[0] as Function;
 
-        expect(f).toHaveLumigoLayerInRegion('eu-central-1', 'lumigo-node-tracer');
+        expect(f).toHaveLumigoLayerInRegion({
+          region: 'eu-central-1', name: 'lumigo-node-tracer',
+        });
         expect(f).toHaveEnvVarWithValue('AWS_LAMBDA_EXEC_WRAPPER', '/opt/lumigo_wrapper');
         expect(f).toHaveEnvVarWithValue('LUMIGO_PROPAGATE_W3C', 'true');
         expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
@@ -228,7 +230,9 @@ describe('Lambda tracing injection', () => {
         expect(root.node.children[0]).toBeInstanceOf(Function);
         const f = root.node.children[0] as Function;
 
-        expect(f).toHaveLumigoLayerInRegion('eu-central-1', 'lumigo-python-tracer');
+        expect(f).toHaveLumigoLayerInRegion({
+          region: 'eu-central-1', name: 'lumigo-python-tracer',
+        });
         expect(f).toHaveEnvVarWithValue('LUMIGO_PROPAGATE_W3C', 'true');
         expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
       });
@@ -255,7 +259,9 @@ describe('Lambda tracing injection', () => {
         expect(root.node.children[0]).toBeInstanceOf(Function);
         const f = root.node.children[0] as Function;
 
-        expect(f).toHaveLumigoLayerInRegionWithVersion('eu-central-1', 'lumigo-node-tracer', 1);
+        expect(f).toHaveLumigoLayerInRegionWithVersion({
+          region: 'eu-central-1', name: 'lumigo-node-tracer', version: '1',
+        });
         expect(f).toHaveEnvVarWithValue('AWS_LAMBDA_EXEC_WRAPPER', '/opt/lumigo_wrapper');
         expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
       });
@@ -278,7 +284,9 @@ describe('Lambda tracing injection', () => {
         expect(root.node.children[0]).toBeInstanceOf(Function);
         const f = root.node.children[0] as Function;
 
-        expect(f).toHaveLumigoLayerInRegionWithVersion('eu-central-1', 'lumigo-python-tracer', 1);
+        expect(f).toHaveLumigoLayerInRegionWithVersion({
+          region: 'eu-central-1', name: 'lumigo-python-tracer', version: '1',
+        });
         expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
       });
 
@@ -302,7 +310,9 @@ describe('Lambda tracing injection', () => {
         expect(root.node.children[0]).toBeInstanceOf(Function);
         const f = root.node.children[0] as Function;
 
-        expect(f).toHaveLumigoLayerInRegion('eu-central-1', 'lumigo-node-tracer');
+        expect(f).toHaveLumigoLayerInRegion({
+          region: 'eu-central-1', name: 'lumigo-node-tracer',
+        });
         expect(f).toHaveEnvVarWithValue('AWS_LAMBDA_EXEC_WRAPPER', '/opt/lumigo_wrapper');
         expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
       });
@@ -323,7 +333,9 @@ describe('Lambda tracing injection', () => {
         expect(root.node.children[0]).toBeInstanceOf(Function);
         const f = root.node.children[0] as Function;
 
-        expect(f).toHaveLumigoLayerInRegion('eu-central-1', 'lumigo-node-tracer');
+        expect(f).toHaveLumigoLayerInRegion({
+          region: 'eu-central-1', name: 'lumigo-node-tracer',
+        });
         expect(f).toHaveEnvVarWithValue('AWS_LAMBDA_EXEC_WRAPPER', '/opt/lumigo_wrapper');
         expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
       });
@@ -362,7 +374,9 @@ describe('Lambda tracing injection', () => {
         expect(root.node.children[0]).toBeInstanceOf(Function);
         const f = root.node.children[0] as Function;
 
-        expect(f).toHaveLumigoLayerInRegion('eu-central-1', 'lumigo-python-tracer');
+        expect(f).toHaveLumigoLayerInRegion({
+          region: 'eu-central-1', name: 'lumigo-python-tracer',
+        });
         expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
       });
 
@@ -407,7 +421,10 @@ describe('Lambda tracing injection', () => {
       expect(root.node.children[0]).toBeInstanceOf(Function);
       const f = root.node.children[0] as Function;
 
-      expect(f).toHaveLumigoLayerInRegion('eu-central-1', 'lumigo-node-tracer');
+      expect(f).toHaveLumigoLayerInRegion({
+        region: 'eu-central-1',
+        name: 'lumigo-node-tracer',
+      });
       expect(f).toHaveEnvVarWithValue('AWS_LAMBDA_EXEC_WRAPPER', '/opt/lumigo_wrapper');
       expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
     });
@@ -427,7 +444,9 @@ describe('Lambda tracing injection', () => {
       expect(root.node.children[0]).toBeInstanceOf(Function);
       const f = root.node.children[0] as Function;
 
-      expect(f).toHaveLumigoLayerInRegion('eu-central-1', 'lumigo-python-tracer');
+      expect(f).toHaveLumigoLayerInRegion({
+        region: 'eu-central-1', name: 'lumigo-python-tracer',
+      });
       expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
     });
 
@@ -446,7 +465,9 @@ describe('Lambda tracing injection', () => {
       expect(root.node.children[0]).toBeInstanceOf(Function);
       const f = root.node.children[0] as Function;
 
-      expect(f).toHaveLumigoLayerInRegionWithVersion('eu-central-1', 'lumigo-node-tracer', 42);
+      expect(f).toHaveLumigoLayerInRegionWithVersion({
+        region: 'eu-central-1', name: 'lumigo-node-tracer', version: '42',
+      });
       expect(f).toHaveEnvVarWithValue('AWS_LAMBDA_EXEC_WRAPPER', '/opt/lumigo_wrapper');
       expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
     });
@@ -466,7 +487,9 @@ describe('Lambda tracing injection', () => {
       expect(root.node.children[0]).toBeInstanceOf(Function);
       const f = root.node.children[0] as Function;
 
-      expect(f).toHaveLumigoLayerInRegionWithVersion('eu-central-1', 'lumigo-python-tracer', 42);
+      expect(f).toHaveLumigoLayerInRegionWithVersion({
+        region: 'eu-central-1', name: 'lumigo-python-tracer', version: '42',
+      });
       expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
     });
 

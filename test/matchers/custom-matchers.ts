@@ -1,13 +1,18 @@
 import { expect } from '@jest/globals';
-import { Function } from 'aws-cdk-lib/aws-lambda';
+import { Function, LayerVersion } from 'aws-cdk-lib/aws-lambda';
+import { IConstruct } from 'constructs';
 
 declare global {
   namespace jest {
     interface Matchers<R> {
       toHaveEnvVarWithValue: (name: string, value: string) => CustomMatcherResult;
       toHaveEnvVarSet: (name: string) => CustomMatcherResult;
-      toHaveLumigoLayerInRegion: (region: string, layerName: string) => CustomMatcherResult;
-      toHaveLumigoLayerInRegionWithVersion: (region: string, layerName: string, layerVersion: number) => CustomMatcherResult;
+      toHaveLumigoLayerInRegion: (layer: {
+        region: string; name: string;
+      }) => CustomMatcherResult;
+      toHaveLumigoLayerInRegionWithVersion: (layer: {
+        region: string; name: string; version: string;
+      }) => CustomMatcherResult;
     }
   }
 }
@@ -63,49 +68,58 @@ expect.extend({
     }
   },
 
-  toHaveLumigoLayerInRegion(func, region: string, layerName: string) {
+  toHaveLumigoLayerInRegion(func: IConstruct, layer: {
+    region: string;
+    name: string;
+  }) {
     if (!(func instanceof Function)) {
       throw new Error('The tested object must be an instance of Function or one of its subclasses');
     }
 
     /* eslint-disable */
-    const pass = (!!func._layers.find(layer => layer.layerVersionArn.startsWith(`arn:aws:lambda:${region}:114300393969:layer:${layerName}:`)));
+    const layers: LayerVersion[]  = (func as any)['layers'];
+    const pass = (!!layers.find(l => l.layerVersionArn.startsWith(`arn:aws:lambda:${layer.region}:114300393969:layer:${layer.name}:`)));
     /* eslint-enable */
 
     if (pass) {
       return {
         message: () =>
-          `expected ${func} not to have the Lumigo layer '${layerName}' from region '${region}'`,
+          `expected ${func} not to have the Lumigo layer '${layer.name}' from region '${layer.region}'`,
         pass: true,
       };
     } else {
       return {
         message: () =>
-          `expected ${func} to have the Lumigo layer '${layerName}' from region '${region}'`,
+          `expected ${func} to have the Lumigo layer '${layer.name}' from region '${layer.region}'`,
         pass: false,
       };
     }
   },
 
-  toHaveLumigoLayerInRegionWithVersion(func, region: string, layerName: string, layerVersion: number) {
+  toHaveLumigoLayerInRegionWithVersion(func: IConstruct, layer: {
+    region: string;
+    name: string;
+    version: string;
+  }) {
     if (!(func instanceof Function)) {
       throw new Error('The tested object must be an instance of Function or one of its subclasses');
     }
 
     /* eslint-disable */
-    const pass = (!!func._layers.find(layer => layer.layerVersionArn.startsWith(`arn:aws:lambda:${region}:114300393969:layer:${layerName}:${layerVersion}`)));
+    const layers: LayerVersion[]  = (func as any)['layers'];
+    const pass = (!!layers.find(l => l.layerVersionArn.startsWith(`arn:aws:lambda:${layer.region}:114300393969:layer:${layer.name}:${layer.version}`)));
     /* eslint-enable */
 
     if (pass) {
       return {
         message: () =>
-          `expected ${func} not to have the Lumigo layer '${layerName}' with version '${layerVersion}' from region '${region}'`,
+          `expected ${func} not to have the Lumigo layer '${layer.name}' with version '${layer.version}' from region '${layer.region}'`,
         pass: true,
       };
     } else {
       return {
         message: () =>
-          `expected ${func} to have the Lumigo layer '${layerName}' with version '${layerVersion}' from region '${region}'`,
+          `expected ${func} to have the Lumigo layer '${layer.name}' with version '${layer.version}' from region '${layer.region}'`,
         pass: false,
       };
     }
