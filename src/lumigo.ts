@@ -40,6 +40,8 @@ const AWS_LAMBDA_EXEC_WRAPPER_ENV_VAR_NAME = 'AWS_LAMBDA_EXEC_WRAPPER';
 
 const AWS_LAMBDA_EXEC_WRAPPER_ENV_VAR_VALUE = '/opt/lumigo_wrapper';
 
+const LUMIGO_ORIGINAL_HANDLER_ENV_VAR_NAME = 'LUMIGO_ORIGINAL_HANDLER';
+
 const LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME = 'LUMIGO_PROPAGATE_W3C';
 
 const LUMIGO_TRACER_TOKEN_ENV_VAR_NAME = 'LUMIGO_TRACER_TOKEN';
@@ -47,6 +49,8 @@ const LUMIGO_TRACER_TOKEN_ENV_VAR_NAME = 'LUMIGO_TRACER_TOKEN';
 const LUMIGO_AUTOTRACE_TAG_NAME = 'lumigo:auto-trace';
 
 const LUMIGO_AUTOTRACE_TAG_VALUE = `${name}@${version}`;
+
+const LUMIGO_LAMBDA_PYTHON_HANDLER = '/opt/python/lumigo_tracer._handler';
 
 /**
  * TODO: Document tracing functions one-by-one
@@ -135,7 +139,7 @@ export class Lumigo {
                 }
               }
             } catch (e) {
-              lumigo.warning(construct, `Cannot set the '${LUMIGO_AUTOTRACE_TAG_NAME}' tag to '${LUMIGO_AUTOTRACE_TAG_VALUE}'.`)
+              lumigo.warning(construct, `Cannot set the '${LUMIGO_AUTOTRACE_TAG_NAME}' tag to '${LUMIGO_AUTOTRACE_TAG_VALUE}'.`);
             }
           } catch (e) {
             if (e instanceof UnsupportedLambdaRuntimeError) {
@@ -170,6 +174,23 @@ export class Lumigo {
       lambda.addEnvironment(AWS_LAMBDA_EXEC_WRAPPER_ENV_VAR_NAME, AWS_LAMBDA_EXEC_WRAPPER_ENV_VAR_VALUE);
 
       lambda.node.addValidation(new HasAwsLambdaExecWrapperEnvVarValidation(lambda));
+    } else if (layerType == LambdaLayerType.PYTHON) {
+      /* eslint-disable */
+      /*
+       * The handler is well hidden in the CfnFunction resource :-(
+       */
+      const nodeAny = (lambda.node as any);
+      const handler = nodeAny?._children['Resource']?.handler;
+
+      if (!!nodeAny && !!nodeAny._children['Resource']) {
+        nodeAny._children['Resource'].handler = LUMIGO_LAMBDA_PYTHON_HANDLER;
+      }
+      /* eslint-enable */
+
+      lambda.addEnvironment(LUMIGO_ORIGINAL_HANDLER_ENV_VAR_NAME, handler);
+
+      lambda.node.addValidation(new HasAwsLambdaOriginalHandlerEnvVarValidation(lambda));
+      lambda.node.addValidation(new HasLumigoPythonHandlerInResourceValidation(lambda));
     }
 
     if (props.enableW3CTraceContext === true) {
@@ -312,6 +333,40 @@ class HasAwsLambdaExecWrapperEnvVarValidation implements IValidation {
 
 }
 
+class HasAwsLambdaOriginalHandlerEnvVarValidation implements IValidation {
+
+  private readonly lambda: SupportedFunction;
+
+  constructor(lambda: SupportedFunction) {
+    this.lambda = lambda;
+  }
+
+  public validate(): string[] {
+    /* eslint-disable */
+    const environment = this.lambda['environment'];
+    /* eslint-enable */
+
+    if (!environment) {
+      return ['No \'environment\' property found on this Lambda; consider upgrading your \'@lumigo/cdk2\' package.'];
+    }
+
+    if (!environment[LUMIGO_ORIGINAL_HANDLER_ENV_VAR_NAME]) {
+      return [`The '${LUMIGO_ORIGINAL_HANDLER_ENV_VAR_NAME}' environment variable is not set.`];
+    }
+
+    const {
+      'value': value,
+    } = environment[LUMIGO_ORIGINAL_HANDLER_ENV_VAR_NAME];
+
+    if (!value) {
+      return [`The '${LUMIGO_ORIGINAL_HANDLER_ENV_VAR_NAME}' environment variable has a blank value.`];
+    }
+
+    return [];
+  }
+
+}
+
 class HasLumigoPropagateW3CEnvVarValidation implements IValidation {
 
   private readonly lambda: SupportedFunction;
@@ -340,6 +395,26 @@ class HasLumigoPropagateW3CEnvVarValidation implements IValidation {
     if (value !== 'true') {
       return [`The '${LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME}' environment variable has a different value than the expected 'true'.`];
     }
+
+    return [];
+  }
+
+}
+
+class HasLumigoPythonHandlerInResourceValidation implements IValidation {
+
+  private readonly lambda: SupportedFunction;
+
+  constructor(lambda: SupportedFunction) {
+    this.lambda = lambda;
+  }
+
+  public validate(): string[] {
+    /* eslint-disable */
+    if ((this.lambda.node as any)._children['Resource'].handler != LUMIGO_LAMBDA_PYTHON_HANDLER) {
+      return [`The handler is not set to Lumigo's '${LUMIGO_LAMBDA_PYTHON_HANDLER}'.`];
+    }
+    /* eslint-enable */
 
     return [];
   }

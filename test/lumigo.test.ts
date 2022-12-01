@@ -17,13 +17,17 @@ export class NodejsTestStack extends Stack {
   }
 }
 
+interface PythonTestStackProps extends StackProps {
+  readonly handler?: string;
+}
+
 export class PythonTestStack extends Stack {
-  constructor(scope: Construct, id: string, props: StackProps = {}) {
+  constructor(scope: Construct, id: string, props: PythonTestStackProps = {}) {
     super(scope, id, props);
 
     new Function(this, 'MyLambda', {
       code: new InlineCode('foo'),
-      handler: 'index.handler',
+      handler: props.handler || 'index.handler',
       runtime: Runtime.PYTHON_3_9,
     });
   }
@@ -212,29 +216,61 @@ describe('Lambda tracing injection', () => {
         expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
       });
 
-      test('a Python function', () => {
-        const app = new App();
+      describe('a Python function', () => {
 
-        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
-          lambdaEnableW3CTraceContext: true,
+        test('with default handler', () => {
+          const app = new App();
+
+          new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+            lambdaEnableW3CTraceContext: true,
+          });
+
+          const root = new PythonTestStack(app, 'PythonTestStack', {
+            env: {
+              region: 'eu-central-1',
+            },
+          });
+
+          app.synth();
+
+          expect(root.node.children[0]).toBeInstanceOf(Function);
+          const f = root.node.children[0] as Function;
+
+          expect(f).toHaveLumigoLayerInRegion({
+            region: 'eu-central-1', name: 'lumigo-python-tracer',
+          });
+          expect(f).toHaveEnvVarWithValue('LUMIGO_PROPAGATE_W3C', 'true');
+          expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
+          expect(f).toHaveEnvVarWithValue('LUMIGO_ORIGINAL_HANDLER', 'index.handler');
         });
 
-        const root = new PythonTestStack(app, 'PythonTestStack', {
-          env: {
-            region: 'eu-central-1',
-          },
+        test('with custom handler', () => {
+          const app = new App();
+
+          new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+            lambdaEnableW3CTraceContext: true,
+          });
+
+          const root = new PythonTestStack(app, 'PythonTestStack', {
+            env: {
+              region: 'eu-central-1',
+            },
+            handler: 'foo.handler',
+          });
+
+          app.synth();
+
+          expect(root.node.children[0]).toBeInstanceOf(Function);
+          const f = root.node.children[0] as Function;
+
+          expect(f).toHaveLumigoLayerInRegion({
+            region: 'eu-central-1', name: 'lumigo-python-tracer',
+          });
+          expect(f).toHaveEnvVarWithValue('LUMIGO_PROPAGATE_W3C', 'true');
+          expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
+          expect(f).toHaveEnvVarWithValue('LUMIGO_ORIGINAL_HANDLER', 'foo.handler');
         });
 
-        app.synth();
-
-        expect(root.node.children[0]).toBeInstanceOf(Function);
-        const f = root.node.children[0] as Function;
-
-        expect(f).toHaveLumigoLayerInRegion({
-          region: 'eu-central-1', name: 'lumigo-python-tracer',
-        });
-        expect(f).toHaveEnvVarWithValue('LUMIGO_PROPAGATE_W3C', 'true');
-        expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
       });
 
     });
@@ -288,6 +324,7 @@ describe('Lambda tracing injection', () => {
           region: 'eu-central-1', name: 'lumigo-python-tracer', version: '1',
         });
         expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
+        expect(f).toHaveEnvVarWithValue('LUMIGO_ORIGINAL_HANDLER', 'index.handler');
       });
 
     });
