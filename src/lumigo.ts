@@ -50,7 +50,7 @@ const LUMIGO_AUTOTRACE_TAG_NAME = 'lumigo:auto-trace';
 
 const LUMIGO_AUTOTRACE_TAG_VALUE = `${name}@${version}`;
 
-const LUMIGO_LAMBDA_PYTHON_HANDLER = '/opt/python/lumigo_tracer._handler';
+const LUMIGO_LAMBDA_PYTHON_HANDLER = 'lumigo_tracer._handler';
 
 /**
  * TODO: Document tracing functions one-by-one
