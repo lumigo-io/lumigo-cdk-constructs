@@ -188,6 +188,42 @@ describe('Lambda tracing injection', () => {
 
   describe('with Lumigo as aspect to the entire application', () => {
 
+    describe('in an unsupported region with', () => {
+
+      test('a Node.js function', () => {
+        const app = new App();
+
+        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+          lambdaEnableW3CTraceContext: true,
+        });
+
+        new NodejsTestStack(app, 'NodejsTestStack', {
+          env: {
+            region: 'never-land-1',
+          },
+        });
+
+        expect(() => { app.synth(); }).toThrowError('The \'lumigo-node-tracer\' layer is not supported in the \'never-land-1\' region.')
+      });
+
+      test('a Python function', () => {
+        const app = new App();
+
+        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+          lambdaEnableW3CTraceContext: true,
+        });
+
+        new PythonTestStack(app, 'PythonTestStack', {
+          env: {
+            region: 'never-land-1',
+          },
+        });
+
+        expect(() => { app.synth(); }).toThrowError('The \'lumigo-python-tracer\' layer is not supported in the \'never-land-1\' region.')
+      });
+
+    });
+
     describe('using W3C TraceContext propagation with', () => {
 
       test('a Node.js function', () => {
