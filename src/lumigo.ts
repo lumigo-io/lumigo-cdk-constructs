@@ -162,9 +162,9 @@ export class Lumigo {
 
     const region = Stack.of(lambda).region;
 
-    const layerVersion = props.layerVersion || this.getLayerLatestVersion(region, layerType);
+    const layerArn = !!props.layerVersion ? `arn:aws:lambda:${region}:114300393969:layer:${layerType}:${props.layerVersion}` : this.getLayerLatestArn(region, layerType);
 
-    lambda.addLayers(LayerVersion.fromLayerVersionArn(lambda, 'LumigoLayer', `arn:aws:lambda:${region}:114300393969:layer:${layerType}:${layerVersion}`));
+    lambda.addLayers(LayerVersion.fromLayerVersionArn(lambda, 'LumigoLayer', layerArn));
     lambda.addEnvironment(LUMIGO_TRACER_TOKEN_ENV_VAR_NAME, this.props.lumigoToken.toString());
 
     lambda.node.addValidation(new HasExactlyOneLumigoLayerValidation(lambda));
@@ -222,15 +222,15 @@ export class Lumigo {
     }
   }
 
-  private getLayerLatestVersion(region: string, type: LambdaLayerType): Number {
-    const latestLayerVersionMap = (type === LambdaLayerType.NODE ? lambdaLayersNodejs : lambdaLayersPython);
-    const latestLayerVersion = (new Map(Object.entries(latestLayerVersionMap))).get(region);
+  private getLayerLatestArn(region: string, type: LambdaLayerType): string {
+    const latestLayerArnByRegion = (type === LambdaLayerType.NODE ? lambdaLayersNodejs : lambdaLayersPython);
+    const latestLayerArn = (new Map(Object.entries(latestLayerArnByRegion))).get(region);
 
-    if (!latestLayerVersion) {
+    if (!latestLayerArn) {
       throw new UnsupportedLambdaLayerRegion(type, region);
     }
 
-    return latestLayerVersion;
+    return latestLayerArn;
   }
 
 }

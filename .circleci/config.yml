@@ -1,0 +1,59 @@
+version: 2.1
+
+orbs:
+  aws-cli: circleci/aws-cli@3.1.4
+
+parameters:
+  run_update_layers:
+    default: false
+    type: boolean
+
+workflows:
+  scheduled-update-layers:
+    triggers:
+    - schedule:
+        cron: "0 0,4,8,12,16,20 * * *"
+        filters:
+          branches:
+            only:
+            - main
+    jobs:
+    - update-layers: {}
+  manual-update-layers:
+    when: << pipeline.parameters.run_update_layers >>
+    jobs:
+    - update-layers: {}
+
+jobs:
+  update-layers:
+    docker:
+      - image: cimg/node:18.12
+        auth:
+          username: lumigo
+          password: $DOCKERHUB_PASSWORD
+    steps:
+      - aws-cli/setup: {}
+      - checkout: {}
+      - run:
+          name: 'Install depedencies for generate-layer-version-files'
+          working_directory: scripts/generate-layer-version-files
+          command: yarn install
+      - run:
+          name: 'Generate Node.js layers file'
+          working_directory: scripts/generate-layer-version-files
+          command: node src/index.js lumigo-node-tracer > ../../src/lambda_layers_nodejs.json && cat ../../src/lambda_layers_nodejs.json
+      - run:
+          name: 'Generate Python layers file'
+          working_directory: scripts/generate-layer-version-files
+          command: node src/index.js lumigo-python-tracer > ../../src/lambda_layers_python.json && cat ../../src/lambda_layers_python.json
+      - run:
+          name: 'Push commit'
+          command: |
+            git config --global user.email "no-reply@build.com"
+            git config --global user.name "CircleCI"
+            if (git commit -am "chore: update latest Lambda layers")
+            then
+              git push origin ${CIRCLE_BRANCH}
+            else
+              echo "No change in Lambda layers detected"
+            fi

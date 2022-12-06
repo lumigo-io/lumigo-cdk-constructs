@@ -1,0 +1,18 @@
+{
+  "name": "generate-layer-version-files",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lumigo-io/lumigo-cdk-constructs.git"
+  },
+  "author": {
+    "name": "Michele Mancioppi",
+    "email": "michelem@lumigo.io",
+    "organization": false
+  },
+  "dependencies": {
+    "aws-sdk": "2.1234.0"
+  },
+  "main": "src/index.js",
+  "license": "Apache-2.0",
+  "version": "0.0.0"
+}
