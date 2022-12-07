@@ -21,5 +21,6 @@ const project = new awscdk.AwsCdkConstructLibrary({
   packageName: '@lumigo/cdk-constructs-v2', /* The "name" in package.json. */
   keywords: ['Observability', 'Serverless', 'Cloud-native', 'Infrastructure-as-code'],
   majorVersion: 0,
+  projenTokenSecret: 'GITHUB_TOKEN',
 });
 project.synth();
