@@ -279,7 +279,7 @@ class HasLumigoTracerEnvVarValidation implements IValidation {
     /* eslint-enable */
 
     if (!environment) {
-      return ['No \'environment\' property found on this Lambda; consider upgrading your \'@lumigo/cdk2\' package.'];
+      return [`No 'environment' property found on this Lambda; consider upgrading your '${name}' package.`];
     }
 
     if (!environment[LUMIGO_TRACER_TOKEN_ENV_VAR_NAME]) {
@@ -313,7 +313,7 @@ class HasAwsLambdaExecWrapperEnvVarValidation implements IValidation {
     /* eslint-enable */
 
     if (!environment) {
-      return ['No \'environment\' property found on this Lambda; consider upgrading your \'@lumigo/cdk2\' package.'];
+      return [`No 'environment' property found on this Lambda; consider upgrading your '${name}' package.`];
     }
 
     if (!environment[AWS_LAMBDA_EXEC_WRAPPER_ENV_VAR_NAME]) {
@@ -347,7 +347,7 @@ class HasAwsLambdaOriginalHandlerEnvVarValidation implements IValidation {
     /* eslint-enable */
 
     if (!environment) {
-      return ['No \'environment\' property found on this Lambda; consider upgrading your \'@lumigo/cdk2\' package.'];
+      return [`No 'environment' property found on this Lambda; consider upgrading your '${name}' package.`];
     }
 
     if (!environment[LUMIGO_ORIGINAL_HANDLER_ENV_VAR_NAME]) {
@@ -381,7 +381,7 @@ class HasLumigoPropagateW3CEnvVarValidation implements IValidation {
     /* eslint-enable */
 
     if (!environment) {
-      return ['No \'environment\' property found on this Lambda; consider upgrading your \'@lumigo/cdk2\' package.'];
+      return [`No 'environment' property found on this Lambda; consider upgrading your '${name}' package.`];
     }
 
     if (!environment[LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME]) {

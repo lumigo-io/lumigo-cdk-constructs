@@ -3,12 +3,12 @@
 
 ## Structs <a name="Structs" id="Structs"></a>
 
-### LumigoAspectProps <a name="LumigoAspectProps" id="lumigo-cdk2-alpha.LumigoAspectProps"></a>
+### LumigoAspectProps <a name="LumigoAspectProps" id="@lumigo/cdk-constructs-v2.LumigoAspectProps"></a>
 
-#### Initializer <a name="Initializer" id="lumigo-cdk2-alpha.LumigoAspectProps.Initializer"></a>
+#### Initializer <a name="Initializer" id="@lumigo/cdk-constructs-v2.LumigoAspectProps.Initializer"></a>
 
 ```typescript
-import { LumigoAspectProps } from 'lumigo-cdk2-alpha'
+import { LumigoAspectProps } from '@lumigo/cdk-constructs-v2'
 
 const lumigoAspectProps: LumigoAspectProps = { ... }
 ```
@@ -17,13 +17,13 @@ const lumigoAspectProps: LumigoAspectProps = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#lumigo-cdk2-alpha.LumigoAspectProps.property.lambdaEnableW3CTraceContext">lambdaEnableW3CTraceContext</a></code> | <code>boolean</code> | *No description.* |
-| <code><a href="#lumigo-cdk2-alpha.LumigoAspectProps.property.lambdaNodejsLayerVersion">lambdaNodejsLayerVersion</a></code> | <code>number</code> | *No description.* |
-| <code><a href="#lumigo-cdk2-alpha.LumigoAspectProps.property.lambdaPythonLayerVersion">lambdaPythonLayerVersion</a></code> | <code>number</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoAspectProps.property.lambdaEnableW3CTraceContext">lambdaEnableW3CTraceContext</a></code> | <code>boolean</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoAspectProps.property.lambdaNodejsLayerVersion">lambdaNodejsLayerVersion</a></code> | <code>number</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoAspectProps.property.lambdaPythonLayerVersion">lambdaPythonLayerVersion</a></code> | <code>number</code> | *No description.* |
 
 ---
 
-##### `lambdaEnableW3CTraceContext`<sup>Optional</sup> <a name="lambdaEnableW3CTraceContext" id="lumigo-cdk2-alpha.LumigoAspectProps.property.lambdaEnableW3CTraceContext"></a>
+##### `lambdaEnableW3CTraceContext`<sup>Optional</sup> <a name="lambdaEnableW3CTraceContext" id="@lumigo/cdk-constructs-v2.LumigoAspectProps.property.lambdaEnableW3CTraceContext"></a>
 
 ```typescript
 public readonly lambdaEnableW3CTraceContext: boolean;
@@ -33,7 +33,7 @@ public readonly lambdaEnableW3CTraceContext: boolean;
 
 ---
 
-##### `lambdaNodejsLayerVersion`<sup>Optional</sup> <a name="lambdaNodejsLayerVersion" id="lumigo-cdk2-alpha.LumigoAspectProps.property.lambdaNodejsLayerVersion"></a>
+##### `lambdaNodejsLayerVersion`<sup>Optional</sup> <a name="lambdaNodejsLayerVersion" id="@lumigo/cdk-constructs-v2.LumigoAspectProps.property.lambdaNodejsLayerVersion"></a>
 
 ```typescript
 public readonly lambdaNodejsLayerVersion: number;
@@ -43,7 +43,7 @@ public readonly lambdaNodejsLayerVersion: number;
 
 ---
 
-##### `lambdaPythonLayerVersion`<sup>Optional</sup> <a name="lambdaPythonLayerVersion" id="lumigo-cdk2-alpha.LumigoAspectProps.property.lambdaPythonLayerVersion"></a>
+##### `lambdaPythonLayerVersion`<sup>Optional</sup> <a name="lambdaPythonLayerVersion" id="@lumigo/cdk-constructs-v2.LumigoAspectProps.property.lambdaPythonLayerVersion"></a>
 
 ```typescript
 public readonly lambdaPythonLayerVersion: number;
@@ -53,12 +53,12 @@ public readonly lambdaPythonLayerVersion: number;
 
 ---
 
-### LumigoProps <a name="LumigoProps" id="lumigo-cdk2-alpha.LumigoProps"></a>
+### LumigoProps <a name="LumigoProps" id="@lumigo/cdk-constructs-v2.LumigoProps"></a>
 
-#### Initializer <a name="Initializer" id="lumigo-cdk2-alpha.LumigoProps.Initializer"></a>
+#### Initializer <a name="Initializer" id="@lumigo/cdk-constructs-v2.LumigoProps.Initializer"></a>
 
 ```typescript
-import { LumigoProps } from 'lumigo-cdk2-alpha'
+import { LumigoProps } from '@lumigo/cdk-constructs-v2'
 
 const lumigoProps: LumigoProps = { ... }
 ```
@@ -67,11 +67,11 @@ const lumigoProps: LumigoProps = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#lumigo-cdk2-alpha.LumigoProps.property.lumigoToken">lumigoToken</a></code> | <code>aws-cdk-lib.SecretValue</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoProps.property.lumigoToken">lumigoToken</a></code> | <code>aws-cdk-lib.SecretValue</code> | *No description.* |
 
 ---
 
-##### `lumigoToken`<sup>Required</sup> <a name="lumigoToken" id="lumigo-cdk2-alpha.LumigoProps.property.lumigoToken"></a>
+##### `lumigoToken`<sup>Required</sup> <a name="lumigoToken" id="@lumigo/cdk-constructs-v2.LumigoProps.property.lumigoToken"></a>
 
 ```typescript
 public readonly lumigoToken: SecretValue;
@@ -81,12 +81,12 @@ public readonly lumigoToken: SecretValue;
 
 ---
 
-### TraceLambdaProps <a name="TraceLambdaProps" id="lumigo-cdk2-alpha.TraceLambdaProps"></a>
+### TraceLambdaProps <a name="TraceLambdaProps" id="@lumigo/cdk-constructs-v2.TraceLambdaProps"></a>
 
-#### Initializer <a name="Initializer" id="lumigo-cdk2-alpha.TraceLambdaProps.Initializer"></a>
+#### Initializer <a name="Initializer" id="@lumigo/cdk-constructs-v2.TraceLambdaProps.Initializer"></a>
 
 ```typescript
-import { TraceLambdaProps } from 'lumigo-cdk2-alpha'
+import { TraceLambdaProps } from '@lumigo/cdk-constructs-v2'
 
 const traceLambdaProps: TraceLambdaProps = { ... }
 ```
@@ -95,13 +95,13 @@ const traceLambdaProps: TraceLambdaProps = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#lumigo-cdk2-alpha.TraceLambdaProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | *No description.* |
-| <code><a href="#lumigo-cdk2-alpha.TraceLambdaProps.property.enableW3CTraceContext">enableW3CTraceContext</a></code> | <code>boolean</code> | *No description.* |
-| <code><a href="#lumigo-cdk2-alpha.TraceLambdaProps.property.layerVersion">layerVersion</a></code> | <code>number</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps.property.enableW3CTraceContext">enableW3CTraceContext</a></code> | <code>boolean</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps.property.layerVersion">layerVersion</a></code> | <code>number</code> | *No description.* |
 
 ---
 
-##### `applyAutoTraceTag`<sup>Optional</sup> <a name="applyAutoTraceTag" id="lumigo-cdk2-alpha.TraceLambdaProps.property.applyAutoTraceTag"></a>
+##### `applyAutoTraceTag`<sup>Optional</sup> <a name="applyAutoTraceTag" id="@lumigo/cdk-constructs-v2.TraceLambdaProps.property.applyAutoTraceTag"></a>
 
 ```typescript
 public readonly applyAutoTraceTag: boolean;
@@ -111,7 +111,7 @@ public readonly applyAutoTraceTag: boolean;
 
 ---
 
-##### `enableW3CTraceContext`<sup>Optional</sup> <a name="enableW3CTraceContext" id="lumigo-cdk2-alpha.TraceLambdaProps.property.enableW3CTraceContext"></a>
+##### `enableW3CTraceContext`<sup>Optional</sup> <a name="enableW3CTraceContext" id="@lumigo/cdk-constructs-v2.TraceLambdaProps.property.enableW3CTraceContext"></a>
 
 ```typescript
 public readonly enableW3CTraceContext: boolean;
@@ -121,7 +121,7 @@ public readonly enableW3CTraceContext: boolean;
 
 ---
 
-##### `layerVersion`<sup>Optional</sup> <a name="layerVersion" id="lumigo-cdk2-alpha.TraceLambdaProps.property.layerVersion"></a>
+##### `layerVersion`<sup>Optional</sup> <a name="layerVersion" id="@lumigo/cdk-constructs-v2.TraceLambdaProps.property.layerVersion"></a>
 
 ```typescript
 public readonly layerVersion: number;
@@ -133,27 +133,27 @@ public readonly layerVersion: number;
 
 ## Classes <a name="Classes" id="Classes"></a>
 
-### Lumigo <a name="Lumigo" id="lumigo-cdk2-alpha.Lumigo"></a>
+### Lumigo <a name="Lumigo" id="@lumigo/cdk-constructs-v2.Lumigo"></a>
 
 TODO: Document tracing functions one-by-one TODO: Document using as Aspect to trace all functions.
 
-#### Initializers <a name="Initializers" id="lumigo-cdk2-alpha.Lumigo.Initializer"></a>
+#### Initializers <a name="Initializers" id="@lumigo/cdk-constructs-v2.Lumigo.Initializer"></a>
 
 ```typescript
-import { Lumigo } from 'lumigo-cdk2-alpha'
+import { Lumigo } from '@lumigo/cdk-constructs-v2'
 
 new Lumigo(props: LumigoProps)
 ```
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#lumigo-cdk2-alpha.Lumigo.Initializer.parameter.props">props</a></code> | <code><a href="#lumigo-cdk2-alpha.LumigoProps">LumigoProps</a></code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.Initializer.parameter.props">props</a></code> | <code><a href="#@lumigo/cdk-constructs-v2.LumigoProps">LumigoProps</a></code> | *No description.* |
 
 ---
 
-##### `props`<sup>Required</sup> <a name="props" id="lumigo-cdk2-alpha.Lumigo.Initializer.parameter.props"></a>
+##### `props`<sup>Required</sup> <a name="props" id="@lumigo/cdk-constructs-v2.Lumigo.Initializer.parameter.props"></a>
 
-- *Type:* <a href="#lumigo-cdk2-alpha.LumigoProps">LumigoProps</a>
+- *Type:* <a href="#@lumigo/cdk-constructs-v2.LumigoProps">LumigoProps</a>
 
 ---
 
@@ -161,68 +161,68 @@ new Lumigo(props: LumigoProps)
 
 | **Name** | **Description** |
 | --- | --- |
-| <code><a href="#lumigo-cdk2-alpha.Lumigo.asAspect">asAspect</a></code> | *No description.* |
-| <code><a href="#lumigo-cdk2-alpha.Lumigo.traceEverything">traceEverything</a></code> | *No description.* |
-| <code><a href="#lumigo-cdk2-alpha.Lumigo.traceLambda">traceLambda</a></code> | *No description.* |
-| <code><a href="#lumigo-cdk2-alpha.Lumigo.visit">visit</a></code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.asAspect">asAspect</a></code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceEverything">traceEverything</a></code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceLambda">traceLambda</a></code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.visit">visit</a></code> | *No description.* |
 
 ---
 
-##### `asAspect` <a name="asAspect" id="lumigo-cdk2-alpha.Lumigo.asAspect"></a>
+##### `asAspect` <a name="asAspect" id="@lumigo/cdk-constructs-v2.Lumigo.asAspect"></a>
 
 ```typescript
 public asAspect(props?: LumigoAspectProps): IAspect
 ```
 
-###### `props`<sup>Optional</sup> <a name="props" id="lumigo-cdk2-alpha.Lumigo.asAspect.parameter.props"></a>
+###### `props`<sup>Optional</sup> <a name="props" id="@lumigo/cdk-constructs-v2.Lumigo.asAspect.parameter.props"></a>
 
-- *Type:* <a href="#lumigo-cdk2-alpha.LumigoAspectProps">LumigoAspectProps</a>
+- *Type:* <a href="#@lumigo/cdk-constructs-v2.LumigoAspectProps">LumigoAspectProps</a>
 
 ---
 
-##### `traceEverything` <a name="traceEverything" id="lumigo-cdk2-alpha.Lumigo.traceEverything"></a>
+##### `traceEverything` <a name="traceEverything" id="@lumigo/cdk-constructs-v2.Lumigo.traceEverything"></a>
 
 ```typescript
 public traceEverything(root: App | Stack, props?: LumigoAspectProps): void
 ```
 
-###### `root`<sup>Required</sup> <a name="root" id="lumigo-cdk2-alpha.Lumigo.traceEverything.parameter.root"></a>
+###### `root`<sup>Required</sup> <a name="root" id="@lumigo/cdk-constructs-v2.Lumigo.traceEverything.parameter.root"></a>
 
 - *Type:* aws-cdk-lib.App | aws-cdk-lib.Stack
 
 ---
 
-###### `props`<sup>Optional</sup> <a name="props" id="lumigo-cdk2-alpha.Lumigo.traceEverything.parameter.props"></a>
+###### `props`<sup>Optional</sup> <a name="props" id="@lumigo/cdk-constructs-v2.Lumigo.traceEverything.parameter.props"></a>
 
-- *Type:* <a href="#lumigo-cdk2-alpha.LumigoAspectProps">LumigoAspectProps</a>
+- *Type:* <a href="#@lumigo/cdk-constructs-v2.LumigoAspectProps">LumigoAspectProps</a>
 
 ---
 
-##### `traceLambda` <a name="traceLambda" id="lumigo-cdk2-alpha.Lumigo.traceLambda"></a>
+##### `traceLambda` <a name="traceLambda" id="@lumigo/cdk-constructs-v2.Lumigo.traceLambda"></a>
 
 ```typescript
 public traceLambda(lambda: Function | NodejsFunction | PythonFunction, props?: TraceLambdaProps): void
 ```
 
-###### `lambda`<sup>Required</sup> <a name="lambda" id="lumigo-cdk2-alpha.Lumigo.traceLambda.parameter.lambda"></a>
+###### `lambda`<sup>Required</sup> <a name="lambda" id="@lumigo/cdk-constructs-v2.Lumigo.traceLambda.parameter.lambda"></a>
 
 - *Type:* aws-cdk-lib.aws_lambda.Function | aws-cdk-lib.aws_lambda_nodejs.NodejsFunction | @aws-cdk/aws-lambda-python-alpha.PythonFunction
 
 ---
 
-###### `props`<sup>Optional</sup> <a name="props" id="lumigo-cdk2-alpha.Lumigo.traceLambda.parameter.props"></a>
+###### `props`<sup>Optional</sup> <a name="props" id="@lumigo/cdk-constructs-v2.Lumigo.traceLambda.parameter.props"></a>
 
-- *Type:* <a href="#lumigo-cdk2-alpha.TraceLambdaProps">TraceLambdaProps</a>
+- *Type:* <a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps">TraceLambdaProps</a>
 
 ---
 
-##### `visit` <a name="visit" id="lumigo-cdk2-alpha.Lumigo.visit"></a>
+##### `visit` <a name="visit" id="@lumigo/cdk-constructs-v2.Lumigo.visit"></a>
 
 ```typescript
 public visit(construct: IConstruct): void
 ```
 
-###### `construct`<sup>Required</sup> <a name="construct" id="lumigo-cdk2-alpha.Lumigo.visit.parameter.construct"></a>
+###### `construct`<sup>Required</sup> <a name="construct" id="@lumigo/cdk-constructs-v2.Lumigo.visit.parameter.construct"></a>
 
 - *Type:* constructs.IConstruct
 
@@ -233,17 +233,17 @@ public visit(construct: IConstruct): void
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#lumigo-cdk2-alpha.Lumigo.property.props">props</a></code> | <code><a href="#lumigo-cdk2-alpha.LumigoProps">LumigoProps</a></code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.property.props">props</a></code> | <code><a href="#@lumigo/cdk-constructs-v2.LumigoProps">LumigoProps</a></code> | *No description.* |
 
 ---
 
-##### `props`<sup>Required</sup> <a name="props" id="lumigo-cdk2-alpha.Lumigo.property.props"></a>
+##### `props`<sup>Required</sup> <a name="props" id="@lumigo/cdk-constructs-v2.Lumigo.property.props"></a>
 
 ```typescript
 public readonly props: LumigoProps;
 ```
 
-- *Type:* <a href="#lumigo-cdk2-alpha.LumigoProps">LumigoProps</a>
+- *Type:* <a href="#@lumigo/cdk-constructs-v2.LumigoProps">LumigoProps</a>
 
 ---
 

@@ -203,7 +203,7 @@ describe('Lambda tracing injection', () => {
           },
         });
 
-        expect(() => { app.synth(); }).toThrowError('The \'lumigo-node-tracer\' layer is not supported in the \'never-land-1\' region.')
+        expect(() => { app.synth(); }).toThrowError('The \'lumigo-node-tracer\' layer is not supported in the \'never-land-1\' region.');
       });
 
       test('a Python function', () => {
@@ -219,7 +219,7 @@ describe('Lambda tracing injection', () => {
           },
         });
 
-        expect(() => { app.synth(); }).toThrowError('The \'lumigo-python-tracer\' layer is not supported in the \'never-land-1\' region.')
+        expect(() => { app.synth(); }).toThrowError('The \'lumigo-python-tracer\' layer is not supported in the \'never-land-1\' region.');
       });
 
     });
