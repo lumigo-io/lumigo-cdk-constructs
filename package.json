@@ -1,6 +1,6 @@
 {
-  "name": "lumigo-cdk2-alpha",
-  "description": "Home to the Lumigo constructs for the AWS Cloud Development Kit (AWS CDK)",
+  "name": "@lumigo/cdk-constructs-v2",
+  "description": "Home to the Lumigo constructs for the AWS Cloud Development Kit (AWS CDK) v2",
   "repository": {
     "type": "git",
     "url": "https://github.com/lumigo-io/lumigo-cdk-constructs.git"
