@@ -109,7 +109,7 @@ export class NodejsStack extends Stack {
 
 const app = new App();
 
-const lumigo = new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(stack);
+const lumigo = new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')});
 
 const stack = new NodejsStack(app, 'NodejsTestStack', {
     env: {
