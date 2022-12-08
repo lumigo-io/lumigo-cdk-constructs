@@ -96,7 +96,7 @@ export class Lumigo {
     Aspects.of(root).add(this.asAspect(props));
   }
 
-  public asAspect(props: LumigoAspectProps = {
+  private asAspect(props: LumigoAspectProps = {
     lambdaEnableW3CTraceContext: false,
   }): IAspect {
     const lumigo = this;

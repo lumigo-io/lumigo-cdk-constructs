@@ -161,22 +161,9 @@ new Lumigo(props: LumigoProps)
 
 | **Name** | **Description** |
 | --- | --- |
-| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.asAspect">asAspect</a></code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceEverything">traceEverything</a></code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceLambda">traceLambda</a></code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.visit">visit</a></code> | *No description.* |
-
----
-
-##### `asAspect` <a name="asAspect" id="@lumigo/cdk-constructs-v2.Lumigo.asAspect"></a>
-
-```typescript
-public asAspect(props?: LumigoAspectProps): IAspect
-```
-
-###### `props`<sup>Optional</sup> <a name="props" id="@lumigo/cdk-constructs-v2.Lumigo.asAspect.parameter.props"></a>
-
-- *Type:* <a href="#@lumigo/cdk-constructs-v2.LumigoAspectProps">LumigoAspectProps</a>
 
 ---
 

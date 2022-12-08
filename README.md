@@ -45,21 +45,6 @@ new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEveryth
 app.synth();
 ```
 
-The `Lumigo.traceEverything` functionality is built using CDK [Aspects](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.Aspects.html), which can also be used directly as follows:
-
-```typescript
-import { Lumigo } from '@lumigo/cdk-constructs-v2';
-import { App, Aspects, SecretValue } from 'aws-cdk-lib';
-
-const app = new App();
-
-// Add here stacks and constructs
-
-Aspects.of(app).add(new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).asAspect());
-
-app.synth();
-```
-
 ### Instrumenting a CDK stack
 
 The following code will apply Lumigo autotracing to all the [supported constructs](#supported-constructs) in the instrumented stack:
