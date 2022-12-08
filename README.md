@@ -11,13 +11,13 @@ If instead of the AWS CDK v2, you are using the [Serverless Framework](https://w
 With `yarn`:
 
 ```sh
-yarn install 'lumigo-cdk2-alpha'
+yarn install '@lumigo/cdk-constructs-v2'
 ```
 
 With `npm`:
 
 ```sh
-npm install 'lumigo-cdk2-alpha'
+npm install '@lumigo/cdk-constructs-v2'
 ```
 
 ## Usage
@@ -33,7 +33,7 @@ The only requirement to use the Lumigo CDK integration is to have the [Lumigo to
 The following code will apply Lumigo autotracing to all the [supported constructs](#supported-constructs):
 
 ```typescript
-import { Lumigo } from 'lumigo-cdk2-alpha';
+import { Lumigo } from '@lumigo/cdk-constructs-v2';
 import { App, SecretValue } from 'aws-cdk-lib';
 
 const app = new App();
@@ -48,7 +48,7 @@ app.synth();
 The `Lumigo.traceEverything` functionality is built using CDK [Aspects](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.Aspects.html), which can also be used directly as follows:
 
 ```typescript
-import { Lumigo } from 'lumigo-cdk2-alpha';
+import { Lumigo } from '@lumigo/cdk-constructs-v2';
 import { App, Aspects, SecretValue } from 'aws-cdk-lib';
 
 const app = new App();
@@ -65,7 +65,7 @@ app.synth();
 The following code will apply Lumigo autotracing to all the [supported constructs](#supported-constructs) in the instrumented stack:
 
 ```typescript
-import { Lumigo } from 'lumigo-cdk2-alpha';
+import { Lumigo } from '@lumigo/cdk-constructs-v2';
 import { App, SecretValue } from 'aws-cdk-lib';
 
 export class NodejsStack extends Stack {
@@ -99,7 +99,7 @@ app.synth();
 ### Instrumenting single functions
 
 ```typescript
-import { Lumigo } from 'lumigo-cdk2-alpha';
+import { Lumigo } from '@lumigo/cdk-constructs-v2';
 import { App, SecretValue } from 'aws-cdk-lib';
 
 interface NodejsStackProps extends StackProps {
@@ -139,12 +139,12 @@ app.synth();
 ### Lambda Layer Version Pinning
 
 Unless specified otherwise, when instrumenting a Lambda function, the Lumigo CDK integration will use the latest known Lambda layer at the moment of publishing the Lumigo CDK integration version.
-(It is considered bad practice in CDK Construct designs to have API calls take place inside the `synth` phase, so new versions of the `lumigo-cdk2-alpha` will regularly be released, pointing at the latest layers.)
+(It is considered bad practice in CDK Construct designs to have API calls take place inside the `synth` phase, so new versions of the `@lumigo/cdk-constructs-v2` will regularly be released, pointing at the latest layers.)
 
 The pinning of specific layer versions can be performed at the level of the entire application or stack:
 
 ```typescript
-import { Lumigo } from 'lumigo-cdk2-alpha';
+import { Lumigo } from '@lumigo/cdk-constructs-v2';
 import { App, SecretValue } from 'aws-cdk-lib';
 
 const app = new App();
@@ -187,7 +187,7 @@ Aty the tracer level, the support of W3C TraceContext is currently opt-in via th
 But the Lumigo CDK integration can apply it to all your Lambda functions:
 
 ```typescript
-import { Lumigo } from 'lumigo-cdk2-alpha';
+import { Lumigo } from '@lumigo/cdk-constructs-v2';
 import { App, SecretValue } from 'aws-cdk-lib';
 
 const app = new App();
