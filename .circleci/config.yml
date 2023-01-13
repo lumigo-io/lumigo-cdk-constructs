@@ -51,9 +51,9 @@ jobs:
           command: |
             git config --global user.email "no-reply@build.com"
             git config --global user.name "CircleCI"
-            if (git commit -am "chore: update latest Lambda layers")
+            if (git commit -am "chore(layers): update latest Lambda layers")
             then
-              git push origin ${CIRCLE_BRANCH}
+              git push -q https://${GH_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git ${CIRCLE_BRANCH}
             else
               echo "No change in Lambda layers detected"
             fi
