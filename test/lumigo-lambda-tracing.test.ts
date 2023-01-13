@@ -1,11 +1,10 @@
 import './matchers/custom-matchers';
 import { App, SecretValue, Stack, StackProps } from 'aws-cdk-lib';
-import { Alias, Function, InlineCode, LayerVersion, Runtime, SingletonFunction } from 'aws-cdk-lib/aws-lambda';
+import { Alias, Function, InlineCode, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 import { Lumigo } from '../src';
 
-
-export class NodejsTestStack extends Stack {
+class NodejsTestStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps = {}) {
     super(scope, id, props);
 
@@ -21,7 +20,7 @@ interface PythonTestStackProps extends StackProps {
   readonly handler?: string;
 }
 
-export class PythonTestStack extends Stack {
+class PythonTestStack extends Stack {
   constructor(scope: Construct, id: string, props: PythonTestStackProps = {}) {
     super(scope, id, props);
 
@@ -33,7 +32,7 @@ export class PythonTestStack extends Stack {
   }
 }
 
-export class NodejsAliasTestStack extends Stack {
+class NodejsAliasTestStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps = {}) {
     super(scope, id, props);
 
@@ -52,31 +51,11 @@ export class NodejsAliasTestStack extends Stack {
   }
 }
 
-export class SingletonFunctionTestStack extends Stack {
-  constructor(scope: Construct, id: string, props: StackProps = {}) {
-    super(scope, id, props);
-
-    new SingletonFunction(this, 'MyLambda1', {
-      uuid: 'af5f3e05-4361-4f78-bb0d-87198da1af99',
-      code: new InlineCode('foo'),
-      handler: 'index.handler',
-      runtime: Runtime.NODEJS_14_X,
-    });
-
-    new SingletonFunction(this, 'MyLambda2', {
-      uuid: 'af5f3e05-4361-4f78-bb0d-87198da1af99',
-      code: new InlineCode('foo'),
-      handler: 'index.handler',
-      runtime: Runtime.NODEJS_14_X,
-    });
-  }
-}
-
 interface LumigoStackProps extends StackProps {
   readonly lumigo: Lumigo;
 }
 
-export class NodejsTestSingleLambdaStack extends Stack {
+class NodejsTestSingleLambdaStack extends Stack {
   constructor(scope: Construct, id: string, props: LumigoStackProps) {
     super(scope, id, props);
 
@@ -90,7 +69,7 @@ export class NodejsTestSingleLambdaStack extends Stack {
   }
 }
 
-export class PythonTestSingleLambdaStack extends Stack {
+class PythonTestSingleLambdaStack extends Stack {
   constructor(scope: Construct, id: string, props: LumigoStackProps) {
     super(scope, id, props);
 
@@ -104,7 +83,7 @@ export class PythonTestSingleLambdaStack extends Stack {
   }
 }
 
-export class NodejsTestOverrideAwsLambdaExecWrapperEnvVarsStack extends Stack {
+class NodejsTestOverrideAwsLambdaExecWrapperEnvVarsStack extends Stack {
   constructor(scope: Construct, id: string, props: LumigoStackProps) {
     super(scope, id, props);
 
@@ -120,7 +99,7 @@ export class NodejsTestOverrideAwsLambdaExecWrapperEnvVarsStack extends Stack {
   }
 }
 
-export class NodejsTestOverrideLumigoTracerTokenWrapperEnvVarsStack extends Stack {
+class NodejsTestOverrideLumigoTracerTokenWrapperEnvVarsStack extends Stack {
   constructor(scope: Construct, id: string, props: LumigoStackProps) {
     super(scope, id, props);
 
@@ -136,7 +115,7 @@ export class NodejsTestOverrideLumigoTracerTokenWrapperEnvVarsStack extends Stac
   }
 }
 
-export class NodejsTestOverrideLumigoLayerStack extends Stack {
+class NodejsTestOverrideLumigoLayerStack extends Stack {
   constructor(scope: Construct, id: string, props: LumigoStackProps) {
     super(scope, id, props);
 
@@ -152,7 +131,7 @@ export class NodejsTestOverrideLumigoLayerStack extends Stack {
   }
 }
 
-export class NodejsTestSingleLambdaPinnedLayerVersionStack extends Stack {
+class NodejsTestSingleLambdaPinnedLayerVersionStack extends Stack {
   constructor(scope: Construct, id: string, props: LumigoStackProps) {
     super(scope, id, props);
 
@@ -168,7 +147,7 @@ export class NodejsTestSingleLambdaPinnedLayerVersionStack extends Stack {
   }
 }
 
-export class PythonTestSingleLambdaPinnedLayerVersionStack extends Stack {
+class PythonTestSingleLambdaPinnedLayerVersionStack extends Stack {
   constructor(scope: Construct, id: string, props: LumigoStackProps) {
     super(scope, id, props);
 
