@@ -1,7 +1,7 @@
 import './matchers/custom-matchers';
 import { App, SecretValue, Stack, StackProps } from 'aws-cdk-lib';
 import { SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, ContainerDefinition, ContainerDependencyCondition, EcrImage, FargateTaskDefinition, TaskDefinition, Volume } from 'aws-cdk-lib/aws-ecs';
+import { CfnTaskDefinition, Cluster, ContainerDefinition, ContainerDependencyCondition, EcrImage, FargateTaskDefinition, TaskDefinition, Volume } from 'aws-cdk-lib/aws-ecs';
 import { ApplicationLoadBalancedFargateService, QueueProcessingFargateService } from 'aws-cdk-lib/aws-ecs-patterns';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
@@ -133,7 +133,9 @@ describe('ECS tracing injection', () => {
 
     const appContainer = containers.find(container => container.containerName !== 'lumigo-injector')!;
     const environment = (appContainer as any).environment as {[key: string]: string};
-    expect(environment.LUMIGO_TRACER_TOKEN).toMatch(/^\$\{Token\[.+\]\}$/);
+    const secrets = (appContainer as any).secrets as CfnTaskDefinition.SecretProperty[];
+    expect(secrets).toHaveLength(1); // No duplicate LUMIGO_TRACER_TOKEN entries
+    expect(secrets[0]).toHaveProperty('name', 'LUMIGO_TRACER_TOKEN');
     expect(environment.LD_PRELOAD).toBe('/opt/lumigo/injector/lumigo_injector.so');
 
     expect(appContainer.mountPoints).toContainEqual({
@@ -150,10 +152,44 @@ describe('ECS tracing injection', () => {
 
   describe('with a QueueProcessingFargateService', () => {
 
-    test('works as intended', () => {
+    test('works with the Lumigo Token specified as SecretManager secret', () => {
       const app = new App();
 
       new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+        traceEcs: true,
+      });
+
+      const root = new QueueProcessingFargateServiceStack(app, 'TestService');
+
+      app.synth();
+
+      const serviceConstruct = root.node.children
+        .find(construct => construct instanceof QueueProcessingFargateService) as QueueProcessingFargateService;
+
+      checkInjectionOccurred(serviceConstruct.taskDefinition);
+    });
+
+    test('works with the Lumigo Token specified as SSM parameter with version', () => {
+      const app = new App();
+
+      new Lumigo({ lumigoToken: SecretValue.ssmSecure('LumigoToken', '42') }).traceEverything(app, {
+        traceEcs: true,
+      });
+
+      const root = new QueueProcessingFargateServiceStack(app, 'TestService');
+
+      app.synth();
+
+      const serviceConstruct = root.node.children
+        .find(construct => construct instanceof QueueProcessingFargateService) as QueueProcessingFargateService;
+
+      checkInjectionOccurred(serviceConstruct.taskDefinition);
+    });
+
+    test('works with the Lumigo Token specified as SSM parameter without version', () => {
+      const app = new App();
+
+      new Lumigo({ lumigoToken: SecretValue.ssmSecure('LumigoToken') }).traceEverything(app, {
         traceEcs: true,
       });
 
