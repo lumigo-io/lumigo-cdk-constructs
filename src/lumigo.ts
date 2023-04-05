@@ -1,7 +1,7 @@
 import { dirname, join } from 'path';
 import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
-import { App, Annotations, IAspect, SecretValue, Stack, Aspects, Tags, TagManager } from 'aws-cdk-lib';
-import { ContainerDefinition, ContainerDependencyCondition, ContainerImage, Ec2Service, FargateService, ITaskDefinitionExtension, TaskDefinition, Volume } from 'aws-cdk-lib/aws-ecs';
+import { App, Annotations, IAspect, SecretValue, Stack, Aspects, Tags, TagManager, CfnDynamicReference, CfnDynamicReferenceService } from 'aws-cdk-lib';
+import { CfnTaskDefinition, ContainerDefinition, ContainerDependencyCondition, ContainerImage, Ec2Service, FargateService, ITaskDefinitionExtension, Secret, TaskDefinition, Volume } from 'aws-cdk-lib/aws-ecs';
 import {
   ApplicationLoadBalancedEc2Service,
   ApplicationLoadBalancedFargateService,
@@ -18,6 +18,8 @@ import {
 } from 'aws-cdk-lib/aws-ecs-patterns';
 import { Function, LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { Secret as SecretManagerSecret } from 'aws-cdk-lib/aws-secretsmanager';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { Construct, IConstruct, IValidation } from 'constructs';
 
 /* eslint-disable */
@@ -119,6 +121,8 @@ const DEFAULT_TRACE_ECS_TASK_DEFINITION_PROPS: TraceEcsTaskDefinitionProps = {
 export class Lumigo {
 
   props: LumigoProps;
+
+  private ecsSecrets: Map<Construct, Secret> = new Map<Construct, Secret>();
 
   constructor(props: LumigoProps) {
     this.props = props;
@@ -263,6 +267,35 @@ export class Lumigo {
     this.doTraceEcsTaskDefinition(taskDefinition, props);
   }
 
+  private lumigoTokenAsEcsSecret(scope: Construct): Secret | undefined {
+    if (!this.ecsSecrets.has(scope)) {
+      const ref = (this.props.lumigoToken as any).rawValue;
+      const res = (ref as any).value.match(/{{resolve:([^:]+):([^:]+)(?:([^:]*)(?:.*)?)?}}/);
+      if (res) {
+        const service = res[1];
+        const secretName = res[2];
+        const other = res[3];
+        switch (service) {
+          case CfnDynamicReferenceService.SECRETS_MANAGER: {
+            const field = other ? other : undefined;
+            this.ecsSecrets.set(scope, Secret.fromSecretsManager(SecretManagerSecret.fromSecretNameV2(scope, 'lumigoTokenSMS', secretName), field));
+            break;
+          }
+          case CfnDynamicReferenceService.SSM_SECURE: {
+            const parameterVersion = other ? Number(other) : undefined;
+            this.ecsSecrets.set(scope, Secret.fromSsmParameter(StringParameter.fromSecureStringParameterAttributes(scope, 'lumigoTokenSSM', {
+              parameterName: secretName,
+              version: parameterVersion,
+            })));
+            break;
+          }
+        }
+      }
+    }
+
+    return this.ecsSecrets.get(scope);
+  }
+
   private doTraceEcsTaskDefinition(taskDefinition: TaskDefinition, props: TraceEcsTaskDefinitionProps = DEFAULT_TRACE_ECS_TASK_DEFINITION_PROPS) {
     /*
      * This function must be idempotent, as `Lumigo.traceEverything()` will apply to
@@ -296,7 +329,13 @@ export class Lumigo {
       });
     }
 
-    const lumigoToken = this.props.lumigoToken.toString();
+    /*
+     * See if we can construct an ECS secret from the SecretValue
+     */
+    let tokenSecret: Secret | undefined;
+    if ((this.props.lumigoToken as any).rawValue instanceof CfnDynamicReference) {
+      tokenSecret = this.lumigoTokenAsEcsSecret(taskDefinition);
+    }
 
     // We wait to start any other container until the inject has done its work
     const otherContainers: ContainerDefinition[] = getTaskDefinitionContainers(taskDefinition)
@@ -321,9 +360,20 @@ export class Lumigo {
       // Trigger the injector
       // The environment is implemented as a dictionary, no need for idempotency checks
       container.addEnvironment(LUMIGO_INJECTOR_ENV_VAR_NAME, LUMIGO_INJECTOR_ENV_VAR_VALUE);
-      // TODO Create secret instead?
-      // The environment is implemented as a dictionary, no need for idempotency checks
-      container.addEnvironment(LUMIGO_TRACER_TOKEN_ENV_VAR_NAME, lumigoToken);
+      if (tokenSecret) {
+        /*
+         * The implementation of ContainerDefinition.addSecret does not check for the secret being specified multiple times,
+         * so we need to avoid duplication ourselves.
+         */
+        const secrets: CfnTaskDefinition.SecretProperty[] = (container as any).secrets as CfnTaskDefinition.SecretProperty[];
+
+        if (!secrets.find((entry) => entry.name === LUMIGO_TRACER_TOKEN_ENV_VAR_NAME)) {
+          container.addSecret(LUMIGO_TRACER_TOKEN_ENV_VAR_NAME, tokenSecret);
+        }
+      } else {
+        // Could not figure out which type of secret value it is, we go for the unwrap
+        container.addEnvironment(LUMIGO_TRACER_TOKEN_ENV_VAR_NAME, this.props.lumigoToken.unsafeUnwrap());
+      }
     });
 
     taskDefinition.node.addValidation(new EcsTaskDefinitionLumigoInjectorVolumeValidation(taskDefinition));
@@ -333,7 +383,13 @@ export class Lumigo {
       taskDefinition.node.addValidation(new EcsContainerDefinitionLumigoInjectorVolumeMountPointValidation(container));
       taskDefinition.node.addValidation(new EcsContainerDefinitionLumigoInjectorContainerConditionValidation(container, injectorContainer));
       taskDefinition.node.addValidation(new EcsContainerDefinitionHasLumigoInjectorEnvVarValidation(container));
-      taskDefinition.node.addValidation(new EcsContainerDefinitionHasLumigoTracerTokenEnvVarValidation(container, lumigoToken));
+      if (tokenSecret) {
+        taskDefinition.node.addValidation(new EcsContainerDefinitionHasLumigoTracerTokenSecretValidation(container));
+      } else {
+        taskDefinition.node.addValidation(new EcsContainerDefinitionHasLumigoTracerTokenEnvVarValidation(
+          container, this.props.lumigoToken.unsafeUnwrap(),
+        ));
+      }
     });
 
     if (!!props.applyAutoTraceTag) {
@@ -353,7 +409,7 @@ export class Lumigo {
     const layerArn = !!props.layerVersion ? `arn:aws:lambda:${region}:114300393969:layer:${layerType}:${props.layerVersion}` : this.getLayerLatestArn(region, layerType);
 
     lambda.addLayers(LayerVersion.fromLayerVersionArn(lambda, 'LumigoLayer', layerArn));
-    lambda.addEnvironment(LUMIGO_TRACER_TOKEN_ENV_VAR_NAME, this.props.lumigoToken.toString());
+    lambda.addEnvironment(LUMIGO_TRACER_TOKEN_ENV_VAR_NAME, this.props.lumigoToken.unsafeUnwrap());
 
     lambda.node.addValidation(new HasExactlyOneLumigoLayerValidation(lambda));
     lambda.node.addValidation(new HasLumigoTracerEnvVarValidation(lambda));
@@ -463,7 +519,7 @@ class EcsTaskDefinitionLumigoInjectorContainerValidation extends TaskDefinitionV
         return;
       }
       case 1: {
-        // TODO Validate contaienr image
+        // TODO Validate container image
         break;
       }
       default: {
@@ -585,6 +641,23 @@ class EcsContainerDefinitionHasLumigoInjectorEnvVarValidation extends ContainerD
 
     if (environment[LUMIGO_INJECTOR_ENV_VAR_NAME] !== LUMIGO_INJECTOR_ENV_VAR_VALUE) {
       this.addIssue(`Container '${containerDefinition.containerName}': The '${LUMIGO_INJECTOR_ENV_VAR_NAME}' does not have the expected value '${LUMIGO_INJECTOR_ENV_VAR_VALUE}'`);
+    }
+  }
+
+}
+
+class EcsContainerDefinitionHasLumigoTracerTokenSecretValidation extends ContainerDefinitionValidation {
+
+  constructor(containerDefinition: ContainerDefinition) {
+    super(containerDefinition);
+  }
+
+  protected validateContainerDefinition(containerDefinition: ContainerDefinition) {
+    const secrets: CfnTaskDefinition.SecretProperty[] = (containerDefinition as any).secrets;
+
+    if (!secrets.find((entry) => entry.name === LUMIGO_TRACER_TOKEN_ENV_VAR_NAME)) {
+      // Don't print out the token value, who knows where these logs end up
+      this.addIssue(`The '${LUMIGO_TRACER_TOKEN_ENV_VAR_NAME}' does is not mounted as a secret built from the SecretValue passed to the Lumigo object`);
     }
   }
 
