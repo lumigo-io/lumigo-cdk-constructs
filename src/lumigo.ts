@@ -50,7 +50,12 @@ export interface LumigoProps {
   readonly lumigoToken: SecretValue;
 }
 
-export interface LumigoTraceProps {
+interface CommonTraceProps {
+  readonly lumigoTag?: string;
+  readonly applyAutoTraceTag?: Boolean;
+}
+
+export interface LumigoTraceProps extends CommonTraceProps {
   readonly traceLambda?: boolean;
   readonly traceEcs?: boolean;
   readonly lambdaNodejsLayerVersion?: Number;
@@ -58,20 +63,15 @@ export interface LumigoTraceProps {
   readonly lambdaEnableW3CTraceContext?: Boolean;
 }
 
-export interface TraceLambdaProps {
+export interface TraceLambdaProps extends CommonTraceProps {
   readonly layerVersion?: Number;
   readonly enableW3CTraceContext?: Boolean;
-  readonly applyAutoTraceTag?: Boolean;
 }
 
-export interface TraceEcsTaskDefinitionProps {
-  // TODO Add container version
-  readonly applyAutoTraceTag?: Boolean;
+export interface TraceEcsTaskDefinitionProps extends CommonTraceProps {
 }
 
-export interface TraceEcsServiceDefinitionProps {
-  // TODO Add container version
-  readonly applyAutoTraceTag?: Boolean;
+export interface TraceEcsServiceDefinitionProps extends CommonTraceProps {
 }
 
 // Layer type to layer name
@@ -93,6 +93,8 @@ const LUMIGO_TRACER_TOKEN_ENV_VAR_NAME = 'LUMIGO_TRACER_TOKEN';
 const LUMIGO_AUTOTRACE_TAG_NAME = 'lumigo:auto-trace';
 
 const LUMIGO_AUTOTRACE_TAG_VALUE = `${name}@${version}`;
+
+const LUMIGO_TAG_TAG_NAME = 'LUMIGO_TAG';
 
 const LUMIGO_LAMBDA_PYTHON_HANDLER = 'lumigo_tracer._handler';
 
@@ -160,9 +162,15 @@ export class Lumigo {
 
   private asAspect(props: LumigoTraceProps = DEFAULT_LUMIGO_TRACE_PROPS): IAspect {
     const lumigo = this;
+    /*
+     * Tags are implemented as aspects in CDK, and unfortunately aspects like
+     * this cannot apply other aspects.
+     */
+    const applyAutoTraceTag = false;
+
     return <IAspect>{
       visit: function(construct: IConstruct): void {
-        function applyAutotraceTagThroughTagManager() {
+        function applyAwsTagThroughTagManager(key: string, value: string) {
           try {
             /**
              * To overcome the limitation that (1) tags are implemented as aspects, (2) that
@@ -175,11 +183,11 @@ export class Lumigo {
               const tags = (scope as any)['tags'];
               /* eslint-enable */
               if (!!tags && tags instanceof TagManager) {
-                tags.setTag(LUMIGO_AUTOTRACE_TAG_NAME, LUMIGO_AUTOTRACE_TAG_VALUE, 100, true);
+                tags.setTag(key, value, 100, true);
               }
             }
           } catch (e) {
-            lumigo.warning(construct, `Cannot set the '${LUMIGO_AUTOTRACE_TAG_NAME}' tag to '${LUMIGO_AUTOTRACE_TAG_VALUE}'.`);
+            lumigo.warning(construct, `Cannot set the '${key}' tag with value '${value}'.`);
           }
         }
 
@@ -197,13 +205,15 @@ export class Lumigo {
             lumigo.traceLambda(construct, {
               layerVersion,
               enableW3CTraceContext: props.lambdaEnableW3CTraceContext === true,
-              /*
-               * Tags are implemented as aspects in CDK, and unfortunately aspects like
-               * this cannot apply other aspects.
-               */
-              applyAutoTraceTag: false,
+              applyAutoTraceTag,
+              lumigoTag: props.lumigoTag,
             });
-            applyAutotraceTagThroughTagManager();
+            if (props.lumigoTag) {
+              applyAwsTagThroughTagManager(LUMIGO_TAG_TAG_NAME, props.lumigoTag!);
+            }
+            if (props.applyAutoTraceTag) {
+              applyAwsTagThroughTagManager(LUMIGO_AUTOTRACE_TAG_NAME, LUMIGO_AUTOTRACE_TAG_VALUE);
+            }
           } catch (e) {
             if (e instanceof UnsupportedLambdaRuntimeError) {
               lumigo.info(construct, `The '${e.unsupportedRuntime}' cannot be automatically traced by Lumigo.`);
@@ -229,13 +239,24 @@ export class Lumigo {
             construct instanceof ScheduledFargateTask
           ) {
             lumigo.traceEcsService(construct, {
-              applyAutoTraceTag: false,
+              applyAutoTraceTag,
             });
+            if (props.lumigoTag) {
+              applyAwsTagThroughTagManager(LUMIGO_TAG_TAG_NAME, props.lumigoTag!);
+            }
+            if (props.applyAutoTraceTag) {
+              applyAwsTagThroughTagManager(LUMIGO_AUTOTRACE_TAG_NAME, LUMIGO_AUTOTRACE_TAG_VALUE);
+            }
           } else if (construct instanceof TaskDefinition) {
             lumigo.traceEcsTaskDefinition(construct, {
-              applyAutoTraceTag: false,
+              applyAutoTraceTag,
             });
-            applyAutotraceTagThroughTagManager();
+            if (props.lumigoTag) {
+              applyAwsTagThroughTagManager(LUMIGO_TAG_TAG_NAME, props.lumigoTag!);
+            }
+            if (props.applyAutoTraceTag) {
+              applyAwsTagThroughTagManager(LUMIGO_AUTOTRACE_TAG_NAME, LUMIGO_AUTOTRACE_TAG_VALUE);
+            }
           }
         }
       },
@@ -257,8 +278,13 @@ export class Lumigo {
     this.warning(service, 'Autotracing of ECS workloads is experimental; if you find any issues, please let us know at https://support.lumigo.io!');
 
     this.doTraceEcsTaskDefinition(service.taskDefinition);
+
     if (!!props.applyAutoTraceTag) {
       this.applyAutotraceTag(service);
+    }
+
+    if (!!props.lumigoTag) {
+      this.applyLumigoTag(service, props.lumigoTag!);
     }
   }
 
@@ -395,6 +421,10 @@ export class Lumigo {
     if (!!props.applyAutoTraceTag) {
       this.applyAutotraceTag(taskDefinition);
     }
+
+    if (!!props.lumigoTag) {
+      this.applyLumigoTag(taskDefinition, props.lumigoTag!);
+    }
   }
 
   public traceLambda(lambda: SupportedLambdaFunction, props: TraceLambdaProps = {
@@ -447,11 +477,19 @@ export class Lumigo {
       this.applyAutotraceTag(lambda);
     }
 
+    if (!!props.lumigoTag) {
+      this.applyLumigoTag(lambda, props.lumigoTag!);
+    }
+
     this.info(lambda, `This function has been modified with Lumigo auto-tracing by the '${LUMIGO_AUTOTRACE_TAG_VALUE}' package.`);
   }
 
   private applyAutotraceTag(construct: Construct): void {
     Tags.of(construct).add(LUMIGO_AUTOTRACE_TAG_NAME, LUMIGO_AUTOTRACE_TAG_VALUE);
+  }
+
+  private applyLumigoTag(construct: Construct, value: string): void {
+    Tags.of(construct).add(LUMIGO_TAG_TAG_NAME, value);
   }
 
   private getLayerType(lambda: SupportedLambdaFunction): LambdaLayerType {

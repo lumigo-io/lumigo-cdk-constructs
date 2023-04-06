@@ -219,6 +219,26 @@ describe('ECS tracing injection', () => {
       checkInjectionOccurred(root.taskDefinition);
     });
 
+    test('applies the Lumigo tag', () => {
+      const app = new App();
+
+      const root = new QueueProcessingFargateServiceStack(app, 'TestService');
+
+      const lumigo = new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') });
+      lumigo.traceEverything(app, {
+        traceEcs: true,
+        lumigoTag: 'TEST',
+      });
+      lumigo.traceEcsTaskDefinition(root.taskDefinition);
+
+      app.synth();
+
+      checkInjectionOccurred(root.taskDefinition);
+
+      expect(root).toHaveAwsTag('LUMIGO_TAG', 'TEST');
+      expect(root.taskDefinition).not.toHaveAwsTag('LUMIGO_TAG', 'TEST');
+    });
+
   });
 
   describe('with a ApplicationLoadBalancedFargateService', () => {
@@ -253,6 +273,96 @@ describe('ECS tracing injection', () => {
       checkInjectionOccurred(root.taskDefinition);
     });
 
+  });
+
+  describe('with a TaskDefinition', () => {
+
+    test('works as intended', () => {
+      const app = new App();
+
+      new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+        traceEcs: true,
+      });
+
+      const stack = new Stack(app, 'TestStack');
+
+      const taskDefinition = new FargateTaskDefinition(stack, 'TestDefinition', {});
+      taskDefinition.addContainer('app', {
+        image: EcrImage.fromRegistry('docker.io/library/hello-world', {}),
+        environment: {
+          OTEL_SERVICE_NAME: 'http-server', // This will be the service name in Lumigo
+          LUMIGO_DEBUG_SPANDUMP: '/dev/stdout',
+        },
+        portMappings: [{
+          containerPort: 8443,
+        }],
+      });
+
+      app.synth();
+
+      checkInjectionOccurred(taskDefinition);
+    });
+
+    test('is idempotent', () => {
+      const app = new App();
+
+      const lumigo = new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') });
+      lumigo.traceEverything(app, {
+        traceEcs: true,
+      });
+
+      const stack = new Stack(app, 'TestStack');
+
+      const taskDefinition = new FargateTaskDefinition(stack, 'TestDefinition', {});
+      taskDefinition.addContainer('app', {
+        image: EcrImage.fromRegistry('docker.io/library/hello-world', {}),
+        environment: {
+          OTEL_SERVICE_NAME: 'http-server', // This will be the service name in Lumigo
+          LUMIGO_DEBUG_SPANDUMP: '/dev/stdout',
+        },
+        portMappings: [{
+          containerPort: 8443,
+        }],
+      });
+
+      lumigo.traceEcsTaskDefinition(taskDefinition);
+
+      app.synth();
+
+      checkInjectionOccurred(taskDefinition);
+    });
+
+  });
+
+  test('applies the Lumigo tag', () => {
+    const app = new App();
+
+    const lumigo = new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') });
+
+    const stack = new Stack(app, 'TestStack');
+
+    const taskDefinition = new FargateTaskDefinition(stack, 'TestDefinition', {});
+    taskDefinition.addContainer('app', {
+      image: EcrImage.fromRegistry('docker.io/library/hello-world', {}),
+      environment: {
+        OTEL_SERVICE_NAME: 'http-server', // This will be the service name in Lumigo
+        LUMIGO_DEBUG_SPANDUMP: '/dev/stdout',
+      },
+      portMappings: [{
+        containerPort: 8443,
+      }],
+    });
+
+    lumigo.traceEcsTaskDefinition(taskDefinition, {
+      lumigoTag: 'TEST',
+    });
+
+    app.synth();
+
+    checkInjectionOccurred(taskDefinition);
+
+    expect(stack).not.toHaveAwsTag('LUMIGO_TAG', 'TEST');
+    expect(taskDefinition).toHaveAwsTag('LUMIGO_TAG', 'TEST');
   });
 
 });
