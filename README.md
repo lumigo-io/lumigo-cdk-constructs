@@ -355,6 +355,30 @@ export class MyNodejsLambdaStack extends Stack {
 }
 ```
 
+### Setting Lumigo tags
+
+[Lumigo tags](https://docs.lumigo.io/docs/tags) add dimension to your Lambda functions so that they can be identified, managed, organized, searched for, and filtered in Lumigo.
+They can be utilized to filter resources for projects, alerts and functions, helping you simplify the complexity of monitoring distributed applications.
+
+Every `trace*` method that the `Lumigo` object offers to trace functions, ECS workloads, entire stacks or applications, supports also setting Lumigo tags on the traced resource:
+
+```typescript
+import { Lumigo } from '@lumigo/cdk-constructs-v2';
+import { App, SecretValue } from 'aws-cdk-lib';
+
+const app = new App();
+
+// Add here stacks and constructs
+
+new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(app, {
+    lumigoTag: 'MY_TAG',
+});
+
+app.synth();
+```
+
+Behind the scenes, the Lumigo CDK integration sets the AWS Tag `LUMIGO_TAG` with the value you specify on the Lambda functions, ECS services and task definitions, etc.
+
 ### W3C TraceContext propagation in AWS Lambda
 
 To be able to trace scenarios in which a Lambda function sends HTTP requests to an application instrumented with OpenTelemetry, like those using the [Lumigo OpenTelemetry Distro for JS](https://github.com/lumigo-io/opentelemetry-js-distro) and [Lumigo OpenTelemetry Distro for Python](https://github.com/lumigo-io/opentelemetry-python-distro) or other OpenTelemetry SDKs, the Lumigo Node.js and Python tracers can optionally add [W3C TraceContext](https://www.w3.org/TR/trace-context/) HTTP headers to outgoing requests.

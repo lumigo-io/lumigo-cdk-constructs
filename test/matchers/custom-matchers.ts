@@ -1,10 +1,12 @@
 import { expect } from '@jest/globals';
+import { Aspects, Tag, TagManager } from 'aws-cdk-lib';
 import { Function, LayerVersion } from 'aws-cdk-lib/aws-lambda';
-import { IConstruct } from 'constructs';
+import { Construct, IConstruct } from 'constructs';
 
 declare global {
   namespace jest {
     interface Matchers<R> {
+      toHaveAwsTag: (key: string, value: string) => CustomMatcherResult;
       toHaveEnvVarWithValue: (name: string, value: string) => CustomMatcherResult;
       toHaveEnvVarSet: (name: string) => CustomMatcherResult;
       toHaveLumigoLayerInRegion: (layer: {
@@ -18,6 +20,58 @@ declare global {
 }
 
 expect.extend({
+  toHaveAwsTag(construct: Construct, key: string, value: string) {
+    const aspects = Aspects.of(construct);
+    for (let aspect of aspects.all ) {
+      if (aspect instanceof Tag) {
+        const tag = aspect as Tag;
+
+        if (tag.key === key) {
+          return {
+            message: () =>
+              `expected ${construct} to have the tag '${key}' set to '${value}'`,
+            pass: tag.value === value,
+          };
+        }
+      }
+    }
+
+    function checkInTagManager(tagManager: TagManager): jest.CustomMatcherResult | undefined {
+      if (!!tagManager) {
+        const tagsValues = tagManager.tagValues();
+        if (tagsValues) {
+          return {
+            message: () =>
+              `expected ${construct} to have the tag '${key}' set to '${value}'`,
+            pass: tagsValues[key] === value,
+          };
+        }
+      }
+
+      return undefined;
+    }
+
+    /**
+     * Fallback in case we set the tag directly into the tag manager at the
+     * construct or scope level.
+     */
+    const resInConstructTagManager = checkInTagManager((construct as any).tags as TagManager);
+    if (resInConstructTagManager) {
+      return resInConstructTagManager as jest.CustomMatcherResult;
+    }
+
+    const resInConstructScopeTagManager = checkInTagManager((construct as any).node?.scope?.tags as TagManager);
+    if (resInConstructScopeTagManager) {
+      return resInConstructScopeTagManager as jest.CustomMatcherResult;
+    }
+
+    return {
+      message: () =>
+        `expected ${construct} to have the tag '${key}'`,
+      pass: false,
+    };
+  },
+
   toHaveEnvVarWithValue(func, name: string, value: string) {
     if (!(func instanceof Function)) {
       throw new Error('The tested object must be an instance of Function or one of its subclasses');

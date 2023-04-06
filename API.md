@@ -45,11 +45,23 @@ const lumigoTraceProps: LumigoTraceProps = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lambdaEnableW3CTraceContext">lambdaEnableW3CTraceContext</a></code> | <code>boolean</code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lambdaNodejsLayerVersion">lambdaNodejsLayerVersion</a></code> | <code>number</code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lambdaPythonLayerVersion">lambdaPythonLayerVersion</a></code> | <code>number</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.traceEcs">traceEcs</a></code> | <code>boolean</code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.traceLambda">traceLambda</a></code> | <code>boolean</code> | *No description.* |
+
+---
+
+##### `applyAutoTraceTag`<sup>Optional</sup> <a name="applyAutoTraceTag" id="@lumigo/cdk-constructs-v2.LumigoTraceProps.property.applyAutoTraceTag"></a>
+
+```typescript
+public readonly applyAutoTraceTag: boolean;
+```
+
+- *Type:* boolean
 
 ---
 
@@ -80,6 +92,16 @@ public readonly lambdaPythonLayerVersion: number;
 ```
 
 - *Type:* number
+
+---
+
+##### `lumigoTag`<sup>Optional</sup> <a name="lumigoTag" id="@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lumigoTag"></a>
+
+```typescript
+public readonly lumigoTag: string;
+```
+
+- *Type:* string
 
 ---
 
@@ -118,6 +140,7 @@ const traceEcsServiceDefinitionProps: TraceEcsServiceDefinitionProps = { ... }
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | *No description.* |
 
 ---
 
@@ -128,6 +151,16 @@ public readonly applyAutoTraceTag: boolean;
 ```
 
 - *Type:* boolean
+
+---
+
+##### `lumigoTag`<sup>Optional</sup> <a name="lumigoTag" id="@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.lumigoTag"></a>
+
+```typescript
+public readonly lumigoTag: string;
+```
+
+- *Type:* string
 
 ---
 
@@ -146,6 +179,7 @@ const traceEcsTaskDefinitionProps: TraceEcsTaskDefinitionProps = { ... }
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsTaskDefinitionProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsTaskDefinitionProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | *No description.* |
 
 ---
 
@@ -156,6 +190,16 @@ public readonly applyAutoTraceTag: boolean;
 ```
 
 - *Type:* boolean
+
+---
+
+##### `lumigoTag`<sup>Optional</sup> <a name="lumigoTag" id="@lumigo/cdk-constructs-v2.TraceEcsTaskDefinitionProps.property.lumigoTag"></a>
+
+```typescript
+public readonly lumigoTag: string;
+```
+
+- *Type:* string
 
 ---
 
@@ -176,6 +220,7 @@ const traceLambdaProps: TraceLambdaProps = { ... }
 | <code><a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps.property.enableW3CTraceContext">enableW3CTraceContext</a></code> | <code>boolean</code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps.property.layerVersion">layerVersion</a></code> | <code>number</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | *No description.* |
 
 ---
 
@@ -206,6 +251,16 @@ public readonly layerVersion: number;
 ```
 
 - *Type:* number
+
+---
+
+##### `lumigoTag`<sup>Optional</sup> <a name="lumigoTag" id="@lumigo/cdk-constructs-v2.TraceLambdaProps.property.lumigoTag"></a>
+
+```typescript
+public readonly lumigoTag: string;
+```
+
+- *Type:* string
 
 ---
 

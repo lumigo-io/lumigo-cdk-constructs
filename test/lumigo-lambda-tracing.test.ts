@@ -53,6 +53,7 @@ class NodejsAliasTestStack extends Stack {
 
 interface LumigoStackProps extends StackProps {
   readonly lumigo: Lumigo;
+  readonly lumigoTag?: string;
 }
 
 class NodejsTestSingleLambdaStack extends Stack {
@@ -65,7 +66,9 @@ class NodejsTestSingleLambdaStack extends Stack {
       runtime: Runtime.NODEJS_14_X,
     });
 
-    props.lumigo.traceLambda(handler);
+    props.lumigo.traceLambda(handler, {
+      lumigoTag: props.lumigoTag,
+    });
   }
 }
 
@@ -79,7 +82,9 @@ class PythonTestSingleLambdaStack extends Stack {
       runtime: Runtime.PYTHON_3_9,
     });
 
-    props.lumigo.traceLambda(handler);
+    props.lumigo.traceLambda(handler, {
+      lumigoTag: props.lumigoTag,
+    });
   }
 }
 
@@ -199,6 +204,28 @@ describe('Lambda tracing injection', () => {
         });
 
         expect(() => { app.synth(); }).toThrowError('The \'lumigo-python-tracer\' layer is not supported in the \'never-land-1\' region.');
+      });
+
+      test('with a Lumigo tag', () => {
+        const app = new App();
+
+        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+          lambdaEnableW3CTraceContext: true,
+          lumigoTag: 'TEST',
+        });
+
+        const root = new PythonTestStack(app, 'PythonTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+        });
+
+        app.synth();
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f).toHaveAwsTag('LUMIGO_TAG', 'TEST');
       });
 
     });
@@ -458,48 +485,104 @@ describe('Lambda tracing injection', () => {
 
     const lumigo = new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') });
 
-    test('a single Node.js function', () => {
-      const app = new App();
+    describe('a single Node.js function', () => {
 
-      const root = new NodejsTestSingleLambdaStack(app, 'NodejsTestStack', {
-        env: {
+      test('with no additional arguments', () => {
+        const app = new App();
+
+        const root = new NodejsTestSingleLambdaStack(app, 'NodejsTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+          lumigo,
+        });
+
+        app.synth();
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f).toHaveLumigoLayerInRegion({
           region: 'eu-central-1',
-        },
-        lumigo,
+          name: 'lumigo-node-tracer',
+        });
+        expect(f).toHaveEnvVarWithValue('AWS_LAMBDA_EXEC_WRAPPER', '/opt/lumigo_wrapper');
+        expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
       });
 
-      app.synth();
+      test('with a Lumigo tag', () => {
+        const app = new App();
 
-      expect(root.node.children[0]).toBeInstanceOf(Function);
-      const f = root.node.children[0] as Function;
+        const root = new NodejsTestSingleLambdaStack(app, 'NodejsTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+          lumigo,
+          lumigoTag: 'TEST',
+        });
 
-      expect(f).toHaveLumigoLayerInRegion({
-        region: 'eu-central-1',
-        name: 'lumigo-node-tracer',
+        app.synth();
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f).toHaveLumigoLayerInRegion({
+          region: 'eu-central-1',
+          name: 'lumigo-node-tracer',
+        });
+        expect(f).toHaveEnvVarWithValue('AWS_LAMBDA_EXEC_WRAPPER', '/opt/lumigo_wrapper');
+        expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
+        expect(f).toHaveAwsTag('LUMIGO_TAG', 'TEST');
       });
-      expect(f).toHaveEnvVarWithValue('AWS_LAMBDA_EXEC_WRAPPER', '/opt/lumigo_wrapper');
-      expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
+
     });
 
-    test('a single Python function', () => {
-      const app = new App();
+    describe('a single Python function', () => {
 
-      const root = new PythonTestSingleLambdaStack(app, 'PythonTestStack', {
-        env: {
-          region: 'eu-central-1',
-        },
-        lumigo,
+      test('with no additional arguments', () => {
+        const app = new App();
+
+        const root = new PythonTestSingleLambdaStack(app, 'PythonTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+          lumigo,
+        });
+
+        app.synth();
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f).toHaveLumigoLayerInRegion({
+          region: 'eu-central-1', name: 'lumigo-python-tracer',
+        });
+        expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
       });
 
-      app.synth();
+      test('with a Lumigo tag', () => {
+        const app = new App();
 
-      expect(root.node.children[0]).toBeInstanceOf(Function);
-      const f = root.node.children[0] as Function;
+        const root = new PythonTestSingleLambdaStack(app, 'PythonTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+          lumigo,
+          lumigoTag: 'TEST',
+        });
 
-      expect(f).toHaveLumigoLayerInRegion({
-        region: 'eu-central-1', name: 'lumigo-python-tracer',
+        app.synth();
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f).toHaveLumigoLayerInRegion({
+          region: 'eu-central-1', name: 'lumigo-python-tracer',
+        });
+        expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
+        expect(f).toHaveAwsTag('LUMIGO_TAG', 'TEST');
       });
-      expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
+
     });
 
     test('a single Node.js function with layer version pinning', () => {
