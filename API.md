@@ -49,6 +49,7 @@ const lumigoTraceProps: LumigoTraceProps = { ... }
 | <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lambdaEnableW3CTraceContext">lambdaEnableW3CTraceContext</a></code> | <code>boolean</code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lambdaNodejsLayerVersion">lambdaNodejsLayerVersion</a></code> | <code>number</code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lambdaPythonLayerVersion">lambdaPythonLayerVersion</a></code> | <code>number</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lumigoAutoTraceImage">lumigoAutoTraceImage</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.traceEcs">traceEcs</a></code> | <code>boolean</code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.traceLambda">traceLambda</a></code> | <code>boolean</code> | *No description.* |
@@ -92,6 +93,16 @@ public readonly lambdaPythonLayerVersion: number;
 ```
 
 - *Type:* number
+
+---
+
+##### `lumigoAutoTraceImage`<sup>Optional</sup> <a name="lumigoAutoTraceImage" id="@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lumigoAutoTraceImage"></a>
+
+```typescript
+public readonly lumigoAutoTraceImage: string;
+```
+
+- *Type:* string
 
 ---
 
@@ -140,6 +151,7 @@ const traceEcsServiceDefinitionProps: TraceEcsServiceDefinitionProps = { ... }
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.lumigoAutoTraceImage">lumigoAutoTraceImage</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | *No description.* |
 
 ---
@@ -151,6 +163,16 @@ public readonly applyAutoTraceTag: boolean;
 ```
 
 - *Type:* boolean
+
+---
+
+##### `lumigoAutoTraceImage`<sup>Optional</sup> <a name="lumigoAutoTraceImage" id="@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.lumigoAutoTraceImage"></a>
+
+```typescript
+public readonly lumigoAutoTraceImage: string;
+```
+
+- *Type:* string
 
 ---
 
@@ -179,6 +201,7 @@ const traceEcsTaskDefinitionProps: TraceEcsTaskDefinitionProps = { ... }
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
 | <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsTaskDefinitionProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsTaskDefinitionProps.property.lumigoAutoTraceImage">lumigoAutoTraceImage</a></code> | <code>string</code> | *No description.* |
 | <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsTaskDefinitionProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | *No description.* |
 
 ---
@@ -190,6 +213,16 @@ public readonly applyAutoTraceTag: boolean;
 ```
 
 - *Type:* boolean
+
+---
+
+##### `lumigoAutoTraceImage`<sup>Optional</sup> <a name="lumigoAutoTraceImage" id="@lumigo/cdk-constructs-v2.TraceEcsTaskDefinitionProps.property.lumigoAutoTraceImage"></a>
+
+```typescript
+public readonly lumigoAutoTraceImage: string;
+```
+
+- *Type:* string
 
 ---
 
