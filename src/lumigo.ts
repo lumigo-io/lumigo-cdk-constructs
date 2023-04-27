@@ -1,4 +1,3 @@
-import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
 import { App, Annotations, IAspect, SecretValue, Stack, Aspects, Tags, TagManager, CfnDynamicReference, CfnDynamicReferenceService } from 'aws-cdk-lib';
@@ -29,6 +28,9 @@ const { name, version } = require(join(dirname(__dirname), 'package.json'));
 
 import * as lambdaLayersNodejs from './lambda_layers_nodejs.json';
 import * as lambdaLayersPython from './lambda_layers_python.json';
+import { image as lumigo_autotrace_image } from './lumigo_autotrace_image.json';
+
+export const DEFAULT_LUMIGO_INJECTOR_IMAGE_NAME = lumigo_autotrace_image;
 
 type SupportedLambdaFunction = Function | NodejsFunction | PythonFunction;
 type SupportedEcsPatternsService = (
@@ -113,8 +115,6 @@ const LUMIGO_INJECTOR_VOLUME_MOUNT_POINT = '/opt/lumigo';
 const LUMIGO_INJECTOR_ENV_VAR_NAME = 'LD_PRELOAD';
 
 const LUMIGO_INJECTOR_ENV_VAR_VALUE = `${LUMIGO_INJECTOR_VOLUME_MOUNT_POINT}/injector/lumigo_injector.so`;
-
-export const DEFAULT_LUMIGO_INJECTOR_IMAGE_NAME = readFileSync(join(__dirname, 'VERSION.lumigo_autotrace')).toString('utf-8');
 
 const DEFAULT_LUMIGO_TRACE_PROPS: LumigoTraceProps = {
   traceLambda: true,

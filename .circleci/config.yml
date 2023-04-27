@@ -64,7 +64,8 @@ jobs:
           name: 'Update lumigo/lumigo-autotrace image tag'
           working_directory: scripts/get-latest-lumigo-autotrace-version
           command: |
-            node src/index.js > ../../src/VERSION.lumigo_autotrace && cat ../../src/VERSION.lumigo_autotrace
+            tag=$(node src/index.js)
+            echo -n "{\"image\":\"public.ecr.aws/lumigo/lumigo-autotrace:${version}\"}" > ../../src/lumigo_autotrace_image.json && cat ../../src/lumigo_autotrace_image.json
 
             if (!git commit -am "chore(layers): update lumigo/lumigo-autotrace container image version")
             then
