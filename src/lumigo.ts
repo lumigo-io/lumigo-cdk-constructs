@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
 import { App, Annotations, IAspect, SecretValue, Stack, Aspects, Tags, TagManager, CfnDynamicReference, CfnDynamicReferenceService } from 'aws-cdk-lib';
@@ -52,26 +53,31 @@ export interface LumigoProps {
 
 interface CommonTraceProps {
   readonly lumigoTag?: string;
-  readonly applyAutoTraceTag?: Boolean;
+  readonly applyAutoTraceTag?: boolean;
 }
 
 export interface LumigoTraceProps extends CommonTraceProps {
   readonly traceLambda?: boolean;
   readonly traceEcs?: boolean;
-  readonly lambdaNodejsLayerVersion?: Number;
-  readonly lambdaPythonLayerVersion?: Number;
-  readonly lambdaEnableW3CTraceContext?: Boolean;
+  readonly lambdaNodejsLayerVersion?: number;
+  readonly lambdaPythonLayerVersion?: number;
+  readonly lambdaEnableW3CTraceContext?: boolean;
+  readonly lumigoAutoTraceImage?: string;
 }
 
 export interface TraceLambdaProps extends CommonTraceProps {
-  readonly layerVersion?: Number;
-  readonly enableW3CTraceContext?: Boolean;
+  readonly layerVersion?: number;
+  readonly enableW3CTraceContext?: boolean;
 }
 
-export interface TraceEcsTaskDefinitionProps extends CommonTraceProps {
+interface CommonTraceEcsProps extends CommonTraceProps {
+  readonly lumigoAutoTraceImage?: string;
 }
 
-export interface TraceEcsServiceDefinitionProps extends CommonTraceProps {
+export interface TraceEcsTaskDefinitionProps extends CommonTraceEcsProps {
+}
+
+export interface TraceEcsServiceDefinitionProps extends CommonTraceEcsProps {
 }
 
 // Layer type to layer name
@@ -104,11 +110,11 @@ const LUMIGO_INJECTOR_VOLUME_NAME = 'lumigo-injector';
 
 const LUMIGO_INJECTOR_VOLUME_MOUNT_POINT = '/opt/lumigo';
 
-const LUMIGO_INJECTOR_IMAGE_NAME = 'public.ecr.aws/lumigo/lumigo-autotrace:latest';
-
 const LUMIGO_INJECTOR_ENV_VAR_NAME = 'LD_PRELOAD';
 
 const LUMIGO_INJECTOR_ENV_VAR_VALUE = `${LUMIGO_INJECTOR_VOLUME_MOUNT_POINT}/injector/lumigo_injector.so`;
+
+export const DEFAULT_LUMIGO_INJECTOR_IMAGE_NAME = readFileSync(join(__dirname, 'VERSION.lumigo_autotrace')).toString('utf-8');
 
 const DEFAULT_LUMIGO_TRACE_PROPS: LumigoTraceProps = {
   traceLambda: true,
@@ -118,6 +124,7 @@ const DEFAULT_LUMIGO_TRACE_PROPS: LumigoTraceProps = {
 
 const DEFAULT_TRACE_ECS_TASK_DEFINITION_PROPS: TraceEcsTaskDefinitionProps = {
   applyAutoTraceTag: true,
+  lumigoAutoTraceImage: DEFAULT_LUMIGO_INJECTOR_IMAGE_NAME,
 };
 
 export class Lumigo {
@@ -240,6 +247,7 @@ export class Lumigo {
           ) {
             lumigo.traceEcsService(construct, {
               applyAutoTraceTag,
+              lumigoAutoTraceImage: props.lumigoAutoTraceImage,
             });
             if (props.lumigoTag) {
               applyAwsTagThroughTagManager(LUMIGO_TAG_TAG_NAME, props.lumigoTag!);
@@ -250,6 +258,7 @@ export class Lumigo {
           } else if (construct instanceof TaskDefinition) {
             lumigo.traceEcsTaskDefinition(construct, {
               applyAutoTraceTag,
+              lumigoAutoTraceImage: props.lumigoAutoTraceImage,
             });
             if (props.lumigoTag) {
               applyAwsTagThroughTagManager(LUMIGO_TAG_TAG_NAME, props.lumigoTag!);
@@ -277,7 +286,10 @@ export class Lumigo {
   }) {
     this.warning(service, 'Autotracing of ECS workloads is experimental; if you find any issues, please let us know at https://support.lumigo.io!');
 
-    this.doTraceEcsTaskDefinition(service.taskDefinition);
+    this.doTraceEcsTaskDefinition(service.taskDefinition, {
+      applyAutoTraceTag: false,
+      lumigoAutoTraceImage: props.lumigoAutoTraceImage,
+    });
 
     if (!!props.applyAutoTraceTag) {
       this.applyAutotraceTag(service);
@@ -339,7 +351,7 @@ export class Lumigo {
       .find(container => container.containerName === LUMIGO_INJECTOR_CONTAINER_NAME)
       || // We did not find the injector container yet, time to add it
       taskDefinition.addContainer(LUMIGO_INJECTOR_CONTAINER_NAME, {
-        image: ContainerImage.fromRegistry(LUMIGO_INJECTOR_IMAGE_NAME),
+        image: ContainerImage.fromRegistry(props.lumigoAutoTraceImage || DEFAULT_LUMIGO_INJECTOR_IMAGE_NAME),
         containerName: LUMIGO_INJECTOR_CONTAINER_NAME,
         environment: {
           TARGET_DIRECTORY: TARGET_DIRECTORY_PATH,

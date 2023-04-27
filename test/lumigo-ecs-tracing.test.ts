@@ -5,7 +5,7 @@ import { CfnTaskDefinition, Cluster, ContainerDefinition, ContainerDependencyCon
 import { ApplicationLoadBalancedFargateService, QueueProcessingFargateService } from 'aws-cdk-lib/aws-ecs-patterns';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
-import { Lumigo } from '../src';
+import { Lumigo, DEFAULT_LUMIGO_INJECTOR_IMAGE_NAME } from '../src';
 
 class ApplicationLoadBalancedFargateServiceStack extends Stack {
 
@@ -111,7 +111,7 @@ class QueueProcessingFargateServiceStack extends Stack {
 
 describe('ECS tracing injection', () => {
 
-  function checkInjectionOccurred(taskDefinition: TaskDefinition) {
+  function checkInjectionOccurred(taskDefinition: TaskDefinition, expectedContainerImage = DEFAULT_LUMIGO_INJECTOR_IMAGE_NAME) {
     const containers: ContainerDefinition[] = (taskDefinition as any).containers;
 
     expect(containers).toHaveLength(2);
@@ -123,7 +123,7 @@ describe('ECS tracing injection', () => {
     expect(volumes[0].efsVolumeConfiguration).toBeUndefined();
 
     const lumigoInjectorContainer = containers.find(container => container.containerName === 'lumigo-injector')!;
-    expect(lumigoInjectorContainer.imageName).toBe('public.ecr.aws/lumigo/lumigo-autotrace:latest');
+    expect(lumigoInjectorContainer.imageName).toBe(expectedContainerImage);
     expect(lumigoInjectorContainer.containerDependencies).toHaveLength(0);
     expect(lumigoInjectorContainer.mountPoints).toContainEqual({
       sourceVolume: 'lumigo-injector',
@@ -203,6 +203,23 @@ describe('ECS tracing injection', () => {
       checkInjectionOccurred(serviceConstruct.taskDefinition);
     });
 
+    test('supports overriding the container image', () => {
+      const app = new App();
+
+      const expectedContainerImage = 'public.ecr.aws/lumigo/lumigo-autotrace:v1';
+      const root = new QueueProcessingFargateServiceStack(app, 'TestService');
+
+      const lumigo = new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') });
+      lumigo.traceEverything(app, {
+        traceEcs: true,
+        lumigoAutoTraceImage: expectedContainerImage,
+      });
+
+      app.synth();
+
+      checkInjectionOccurred(root.taskDefinition, expectedContainerImage);
+    });
+
     test('is idempotent', () => {
       const app = new App();
 
@@ -257,6 +274,22 @@ describe('ECS tracing injection', () => {
       checkInjectionOccurred(root.taskDefinition);
     });
 
+    test('supports overriding the container image', () => {
+      const app = new App();
+
+      const expectedContainerImage = 'public.ecr.aws/lumigo/lumigo-autotrace:v1';
+      new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+        traceEcs: true,
+        lumigoAutoTraceImage: expectedContainerImage,
+      });
+
+      const root = new ApplicationLoadBalancedFargateServiceStack(app, 'TestService');
+
+      app.synth();
+
+      checkInjectionOccurred(root.taskDefinition, expectedContainerImage);
+    });
+
     test('is idempotent', () => {
       const app = new App();
 
@@ -301,6 +334,34 @@ describe('ECS tracing injection', () => {
       app.synth();
 
       checkInjectionOccurred(taskDefinition);
+    });
+
+    test('supports overriding the container image', () => {
+      const app = new App();
+
+      const expectedContainerImage = 'public.ecr.aws/lumigo/lumigo-autotrace:v1';
+      new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+        traceEcs: true,
+        lumigoAutoTraceImage: expectedContainerImage,
+      });
+
+      const stack = new Stack(app, 'TestStack');
+
+      const taskDefinition = new FargateTaskDefinition(stack, 'TestDefinition', {});
+      taskDefinition.addContainer('app', {
+        image: EcrImage.fromRegistry('docker.io/library/hello-world', {}),
+        environment: {
+          OTEL_SERVICE_NAME: 'http-server', // This will be the service name in Lumigo
+          LUMIGO_DEBUG_SPANDUMP: '/dev/stdout',
+        },
+        portMappings: [{
+          containerPort: 8443,
+        }],
+      });
+
+      app.synth();
+
+      checkInjectionOccurred(taskDefinition, expectedContainerImage);
     });
 
     test('is idempotent', () => {
