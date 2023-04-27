@@ -355,6 +355,32 @@ export class MyNodejsLambdaStack extends Stack {
 }
 ```
 
+### ECS tracer version pinning
+
+The [tracing on Amazon ECS](#instrumenting-single-ecs-services) relies on the [`lumigo/lumigo-autotrace`](https://gallery.ecr.aws/lumigo/lumigo-autotrace) container image available on Amazon ECR Public Gallery.
+By default, the Lumigo CDK integration will use the latest image tag at the moment of publishing the adopted version of the `@lumigo/cdk-constructs-v2` package.
+(It is considered bad practice in CDK Construct designs to have API calls take place inside the `synth` phase, so new versions of the `@lumigo/cdk-constructs-v2` are regularly released, pointing at the latest container image tag.)
+
+The pinning of specific layer versions can be performed at the level of the entire application or stack:
+
+```typescript
+import { Lumigo } from '@lumigo/cdk-constructs-v2';
+import { App, SecretValue } from 'aws-cdk-lib';
+
+const app = new App();
+
+// Add here stacks and constructs
+
+new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(app, {
+    traceEcs: true,
+    lumigoAutoTraceImage: 'public.ecr.aws/lumigo/lumigo-autotrace:v12',  // See https://gallery.ecr.aws/lumigo/lumigo-autotrace for the list of currently available tags
+});
+
+app.synth();
+```
+
+Image-version pinning can also be done for single Amazon ECS task definitions and services. 
+
 ### Setting Lumigo tags
 
 [Lumigo tags](https://docs.lumigo.io/docs/tags) add dimension to your Lambda functions so that they can be identified, managed, organized, searched for, and filtered in Lumigo.

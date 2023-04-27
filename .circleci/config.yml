@@ -51,9 +51,30 @@ jobs:
           command: |
             git config --global user.email "no-reply@build.com"
             git config --global user.name "CircleCI"
-            if (git commit -am "chore(layers): update latest Lambda layers")
+
+            if (!git commit -am "chore(layers): update latest Lambda layers")
             then
+              echo "No change in Lambda layers detected"
+            fi
+      - run:
+          name: 'Install depedencies for get-latest-lumigo-autotrace-version'
+          working_directory: scripts/get-latest-lumigo-autotrace-version
+          command: yarn install
+      - run:
+          name: 'Update lumigo/lumigo-autotrace image tag'
+          working_directory: scripts/get-latest-lumigo-autotrace-version
+          command: |
+            node src/index.js > ../../src/VERSION.lumigo_autotrace && cat ../../src/VERSION.lumigo_autotrace
+
+            if (!git commit -am "chore(layers): update lumigo/lumigo-autotrace container image version")
+            then
+              echo "No change in lumigo/lumigo-autotrace container image detected"
+            fi
+      - run:
+          name: Push updates to repo
+          command: |
+            if [ "$(git rev-parse --verify HEAD)" != "${CIRCLE_SHA1}" ]; then
               git push -q https://${GH_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git ${CIRCLE_BRANCH}
             else
-              echo "No change in Lambda layers detected"
+              echo "No changes in pinned versions detected"
             fi
