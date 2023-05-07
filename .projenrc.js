@@ -39,13 +39,13 @@ const packageJson = JSON.parse(readFileSync(packageJsonPath));
 
 const packageJsonEntries = Object.entries(packageJson);
 packageJsonEntries.splice(
-  // Insert peerDependenciesMeta right after `peerDependencies`, because beautiful JSON parses fastah
+  // Insert `peerDependenciesMeta` right after `peerDependencies`, because beautiful JSON parses fastah
   packageJsonEntries.findIndex(([key, _]) => 'peerDependencies' === key) + 1,
   0,
   ['peerDependenciesMeta', {
     '@aws-cdk/aws-lambda-python-alpha': {
       optional: true,
     },
-  }]
+  }],
 );
 writeFileSync(packageJsonPath, JSON.stringify(Object.fromEntries(packageJsonEntries), null, 2));
