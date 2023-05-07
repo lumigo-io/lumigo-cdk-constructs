@@ -407,7 +407,7 @@ Behind the scenes, the Lumigo CDK integration sets the AWS Tag `LUMIGO_TAG` with
 
 ### W3C TraceContext propagation in AWS Lambda
 
-To be able to trace scenarios in which a Lambda function sends HTTP requests to an application instrumented with OpenTelemetry, like those using the [Lumigo OpenTelemetry Distro for JS](https://github.com/lumigo-io/opentelemetry-js-distro) and [Lumigo OpenTelemetry Distro for Python](https://github.com/lumigo-io/opentelemetry-python-distro) or other OpenTelemetry SDKs, the Lumigo Node.js and Python tracers can optionally add [W3C TraceContext](https://www.w3.org/TR/trace-context/) HTTP headers to outgoing requests.
+To be able to trace scenarios in which a Lambda function sends HTTP requests to an application instrumented with OpenTelemetry, like those using the [Lumigo OpenTelemetry Distro for Java](https://github.com/lumigo-io/opentelemetry-java-distro), [Lumigo OpenTelemetry Distro for JS](https://github.com/lumigo-io/opentelemetry-js-distro) and [Lumigo OpenTelemetry Distro for Python](https://github.com/lumigo-io/opentelemetry-python-distro) or other OpenTelemetry SDKs, the Lumigo Node.js and Python tracers can optionally add [W3C TraceContext](https://www.w3.org/TR/trace-context/) HTTP headers to outgoing requests.
 
 Aty the tracer level, the support of W3C TraceContext is currently opt-in via the `LUMIGO_PROPAGATE_W3C=true` environment variable.
 But the Lumigo CDK integration can apply it to all your Lambda functions:
@@ -471,7 +471,7 @@ When encountering a [supported AWS Lambda-related construct](#supported-aws-lamb
 When encountering a [supported Amazon ECS-related construct](#supported-amazon-ecs-constructs), the Lumigo CDK integration:
 
 1. Adds an [ephemeral volume](https://docs.aws.amazon.com/AmazonECS/latest/userguide/using_data_volumes.html) called `lumigo-injector` to the task definition
-1. Adds a container called `lumigo-injector` that uses a [public Amazon ECR image](public.ecr.aws/lumigo/lumigo-autotrace:latest); the image contains the latest copies of the [Lumigo OpenTelemetry Distro for Node.js](https://github.com/lumigo-io/opentelemetry-js-distro) and [Lumigo OpenTelemetry Distro for Python](https://github.com/lumigo-io/opentelemetry-python-distro), alongside an `LD_PRELOAD` injector that is not unlike this [OpenTelemetry Injector](https://github.com/mmanciop/opentelemetry-injector).
+1. Adds a container called `lumigo-injector` that uses a [public Amazon ECR image](public.ecr.aws/lumigo/lumigo-autotrace:latest); the image contains the latest copies of the [Lumigo OpenTelemetry Distro for Java](https://github.com/lumigo-io/opentelemetry-java-distro), [Lumigo OpenTelemetry Distro for Node.js](https://github.com/lumigo-io/opentelemetry-js-distro) and [Lumigo OpenTelemetry Distro for Python](https://github.com/lumigo-io/opentelemetry-python-distro), alongside an `LD_PRELOAD` injector that is not unlike this [OpenTelemetry Injector](https://github.com/mmanciop/opentelemetry-injector).
 1. The `lumigo-injector` volume is mounted to all containers in the task definition, including the `lumigo-injector` container.
 1. All containers other than `lumigo-injector` get added:
   1. A [container dependency](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ContainerDependency.html) on the completion of the `lumigo-injector` container.
