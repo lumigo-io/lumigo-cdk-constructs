@@ -2,7 +2,7 @@ import { dirname, join } from 'path';
 
 /*
  * We really only need the type, not the code. By using `import type`,
- * we remove dependencies at runtime.
+ * we do not need the dependency at runtime.
  */
 import type { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
 
