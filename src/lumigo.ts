@@ -1,5 +1,11 @@
 import { dirname, join } from 'path';
-import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
+
+/*
+ * We really only need the type, not the code. By using `import type`,
+ * we remove dependencies at runtime.
+ */
+import type { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
+
 import { App, Annotations, IAspect, SecretValue, Stack, Aspects, Tags, TagManager, CfnDynamicReference, CfnDynamicReferenceService } from 'aws-cdk-lib';
 import { CfnTaskDefinition, ContainerDefinition, ContainerDependencyCondition, ContainerImage, Ec2Service, FargateService, ITaskDefinitionExtension, Secret, TaskDefinition, Volume } from 'aws-cdk-lib/aws-ecs';
 import {
