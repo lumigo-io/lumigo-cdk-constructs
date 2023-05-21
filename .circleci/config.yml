@@ -35,24 +35,26 @@ jobs:
       - aws-cli/setup: {}
       - checkout: {}
       - run:
+          name: Configure Git
+          command: |
+            git config --global user.email "no-reply@build.com"
+            git config --global user.name "CircleCI"
+      - run:
           name: 'Install depedencies for generate-layer-version-files'
           working_directory: scripts/generate-layer-version-files
           command: yarn install
       - run:
           name: 'Generate Node.js layers file'
           working_directory: scripts/generate-layer-version-files
-          command: node src/index.js lumigo-node-tracer > ../../src/lambda_layers_nodejs.json && cat ../../src/lambda_layers_nodejs.json
+          command: node src/index.js lumigo-node-tracer | tee ../../src/lambda_layers_nodejs.json
       - run:
           name: 'Generate Python layers file'
           working_directory: scripts/generate-layer-version-files
-          command: node src/index.js lumigo-python-tracer > ../../src/lambda_layers_python.json && cat ../../src/lambda_layers_python.json
+          command: node src/index.js lumigo-python-tracer | tee ../../src/lambda_layers_python.json
       - run:
           name: 'Push commit'
           command: |
-            git config --global user.email "no-reply@build.com"
-            git config --global user.name "CircleCI"
-
-            if (!git commit -am "chore(layers): update latest Lambda layers")
+            if ! git commit -am "chore(lambda-autotrace): update latest Lambda layers"
             then
               echo "No change in Lambda layers detected"
             fi
@@ -66,7 +68,7 @@ jobs:
           command: |
             jq -n -c -j -r --arg latest_tag "$(node src/index.js)" '{image : ("public.ecr.aws/lumigo/lumigo-autotrace:" + $latest_tag)}' | tee ../../src/lumigo_autotrace_image.json
 
-            if (!git commit -am "chore(layers): update lumigo/lumigo-autotrace container image version")
+            if ! git commit -am "chore(container-autotrace): update lumigo/lumigo-autotrace container image version" 
             then
               echo "No change in lumigo/lumigo-autotrace container image detected"
             fi
