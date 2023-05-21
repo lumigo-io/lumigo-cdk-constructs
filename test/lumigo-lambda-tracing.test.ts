@@ -4,170 +4,6 @@ import { Alias, Function, InlineCode, LayerVersion, Runtime } from 'aws-cdk-lib/
 import { Construct } from 'constructs';
 import { Lumigo } from '../src';
 
-class NodejsTestStack extends Stack {
-  constructor(scope: Construct, id: string, props: StackProps = {}) {
-    super(scope, id, props);
-
-    new Function(this, 'MyLambda', {
-      code: new InlineCode('foo'),
-      handler: 'index.handler',
-      runtime: Runtime.NODEJS_14_X,
-    });
-  }
-}
-
-interface PythonTestStackProps extends StackProps {
-  readonly handler?: string;
-}
-
-class PythonTestStack extends Stack {
-  constructor(scope: Construct, id: string, props: PythonTestStackProps = {}) {
-    super(scope, id, props);
-
-    new Function(this, 'MyLambda', {
-      code: new InlineCode('foo'),
-      handler: props.handler || 'index.handler',
-      runtime: Runtime.PYTHON_3_9,
-    });
-  }
-}
-
-class NodejsAliasTestStack extends Stack {
-  constructor(scope: Construct, id: string, props: StackProps = {}) {
-    super(scope, id, props);
-
-    const func = new Function(this, 'MyLambda', {
-      code: new InlineCode('foo'),
-      handler: 'index.handler',
-      runtime: Runtime.NODEJS_14_X,
-    });
-
-    const version = func.currentVersion;
-    new Alias(this, 'MyLambdaAlias', {
-      aliasName: 'Alias1',
-      provisionedConcurrentExecutions: 42,
-      version,
-    });
-  }
-}
-
-interface LumigoStackProps extends StackProps {
-  readonly lumigo: Lumigo;
-  readonly lumigoTag?: string;
-}
-
-class NodejsTestSingleLambdaStack extends Stack {
-  constructor(scope: Construct, id: string, props: LumigoStackProps) {
-    super(scope, id, props);
-
-    const handler = new Function(this, 'MyLambda', {
-      code: new InlineCode('foo'),
-      handler: 'index.handler',
-      runtime: Runtime.NODEJS_14_X,
-    });
-
-    props.lumigo.traceLambda(handler, {
-      lumigoTag: props.lumigoTag,
-    });
-  }
-}
-
-class PythonTestSingleLambdaStack extends Stack {
-  constructor(scope: Construct, id: string, props: LumigoStackProps) {
-    super(scope, id, props);
-
-    const handler = new Function(this, 'MyLambda', {
-      code: new InlineCode('foo'),
-      handler: 'index.handler',
-      runtime: Runtime.PYTHON_3_9,
-    });
-
-    props.lumigo.traceLambda(handler, {
-      lumigoTag: props.lumigoTag,
-    });
-  }
-}
-
-class NodejsTestOverrideAwsLambdaExecWrapperEnvVarsStack extends Stack {
-  constructor(scope: Construct, id: string, props: LumigoStackProps) {
-    super(scope, id, props);
-
-    const handler = new Function(this, 'MyLambda', {
-      code: new InlineCode('foo'),
-      handler: 'index.handler',
-      runtime: Runtime.NODEJS_14_X,
-    });
-
-    props.lumigo.traceLambda(handler);
-
-    handler.addEnvironment('AWS_LAMBDA_EXEC_WRAPPER', '');
-  }
-}
-
-class NodejsTestOverrideLumigoTracerTokenWrapperEnvVarsStack extends Stack {
-  constructor(scope: Construct, id: string, props: LumigoStackProps) {
-    super(scope, id, props);
-
-    const handler = new Function(this, 'MyLambda', {
-      code: new InlineCode('foo'),
-      handler: 'index.handler',
-      runtime: Runtime.NODEJS_14_X,
-    });
-
-    props.lumigo.traceLambda(handler);
-
-    handler.addEnvironment('LUMIGO_TRACER_TOKEN', '');
-  }
-}
-
-class NodejsTestOverrideLumigoLayerStack extends Stack {
-  constructor(scope: Construct, id: string, props: LumigoStackProps) {
-    super(scope, id, props);
-
-    const handler = new Function(this, 'MyLambda', {
-      code: new InlineCode('foo'),
-      handler: 'index.handler',
-      runtime: Runtime.NODEJS_14_X,
-    });
-
-    props.lumigo.traceLambda(handler);
-
-    handler.addLayers(LayerVersion.fromLayerVersionArn(handler, 'AdditionaLayer', `arn:aws:lambda:${handler.env.region!}:114300393969:layer:000`));
-  }
-}
-
-class NodejsTestSingleLambdaPinnedLayerVersionStack extends Stack {
-  constructor(scope: Construct, id: string, props: LumigoStackProps) {
-    super(scope, id, props);
-
-    const handler = new Function(this, 'MyLambda', {
-      code: new InlineCode('foo'),
-      handler: 'index.handler',
-      runtime: Runtime.NODEJS_14_X,
-    });
-
-    props.lumigo.traceLambda(handler, {
-      layerVersion: 42,
-    });
-  }
-}
-
-class PythonTestSingleLambdaPinnedLayerVersionStack extends Stack {
-  constructor(scope: Construct, id: string, props: LumigoStackProps) {
-    super(scope, id, props);
-
-    const handler = new Function(this, 'MyLambda', {
-      code: new InlineCode('foo'),
-      handler: 'index.handler',
-      runtime: Runtime.PYTHON_3_9,
-    });
-
-    props.lumigo.traceLambda(handler, {
-      layerVersion: 42,
-    });
-  }
-}
-
 describe('Lambda tracing injection', () => {
 
   describe('with Lumigo as aspect to the entire application', () => {
@@ -177,9 +13,7 @@ describe('Lambda tracing injection', () => {
       test('a Node.js function', () => {
         const app = new App();
 
-        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
-          lambdaEnableW3CTraceContext: true,
-        });
+        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app);
 
         new NodejsTestStack(app, 'NodejsTestStack', {
           env: {
@@ -193,9 +27,7 @@ describe('Lambda tracing injection', () => {
       test('a Python function', () => {
         const app = new App();
 
-        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
-          lambdaEnableW3CTraceContext: true,
-        });
+        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app);
 
         new PythonTestStack(app, 'PythonTestStack', {
           env: {
@@ -210,7 +42,6 @@ describe('Lambda tracing injection', () => {
         const app = new App();
 
         new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
-          lambdaEnableW3CTraceContext: true,
           lumigoTag: 'TEST',
         });
 
@@ -230,7 +61,7 @@ describe('Lambda tracing injection', () => {
 
     });
 
-    describe('using W3C TraceContext propagation with', () => {
+    describe('enabling W3C TraceContext propagation with', () => {
 
       test('a Node.js function', () => {
         const app = new App();
@@ -309,6 +140,93 @@ describe('Lambda tracing injection', () => {
             region: 'eu-central-1', name: 'lumigo-python-tracer',
           });
           expect(f).toHaveEnvVarWithValue('LUMIGO_PROPAGATE_W3C', 'true');
+          expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
+          expect(f).toHaveEnvVarWithValue('LUMIGO_ORIGINAL_HANDLER', 'foo.handler');
+        });
+
+      });
+
+    });
+
+    describe('disabling W3C TraceContext propagation with', () => {
+
+      test('a Node.js function', () => {
+        const app = new App();
+
+        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+          lambdaEnableW3CTraceContext: false,
+        });
+
+        const root = new NodejsTestStack(app, 'NodejsTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+        });
+
+        app.synth();
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f).toHaveLumigoLayerInRegion({
+          region: 'eu-central-1', name: 'lumigo-node-tracer',
+        });
+        expect(f).toHaveEnvVarWithValue('AWS_LAMBDA_EXEC_WRAPPER', '/opt/lumigo_wrapper');
+        expect(f).toHaveEnvVarWithValue('LUMIGO_PROPAGATE_W3C', 'false');
+        expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
+      });
+
+      describe('a Python function', () => {
+
+        test('with default handler', () => {
+          const app = new App();
+
+          new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+            lambdaEnableW3CTraceContext: false,
+          });
+
+          const root = new PythonTestStack(app, 'PythonTestStack', {
+            env: {
+              region: 'eu-central-1',
+            },
+          });
+
+          app.synth();
+
+          expect(root.node.children[0]).toBeInstanceOf(Function);
+          const f = root.node.children[0] as Function;
+
+          expect(f).toHaveLumigoLayerInRegion({
+            region: 'eu-central-1', name: 'lumigo-python-tracer',
+          });
+          expect(f).toHaveEnvVarWithValue('LUMIGO_PROPAGATE_W3C', 'false');
+          expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
+          expect(f).toHaveEnvVarWithValue('LUMIGO_ORIGINAL_HANDLER', 'index.handler');
+        });
+
+        test('with custom handler', () => {
+          const app = new App();
+
+          new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+            lambdaEnableW3CTraceContext: false,
+          });
+
+          const root = new PythonTestStack(app, 'PythonTestStack', {
+            env: {
+              region: 'eu-central-1',
+            },
+            handler: 'foo.handler',
+          });
+
+          app.synth();
+
+          expect(root.node.children[0]).toBeInstanceOf(Function);
+          const f = root.node.children[0] as Function;
+
+          expect(f).toHaveLumigoLayerInRegion({
+            region: 'eu-central-1', name: 'lumigo-python-tracer',
+          });
+          expect(f).toHaveEnvVarWithValue('LUMIGO_PROPAGATE_W3C', 'false');
           expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
           expect(f).toHaveEnvVarWithValue('LUMIGO_ORIGINAL_HANDLER', 'foo.handler');
         });
@@ -686,3 +604,167 @@ describe('Lambda tracing injection', () => {
   });
 
 });
+
+class NodejsTestStack extends Stack {
+  constructor(scope: Construct, id: string, props: StackProps = {}) {
+    super(scope, id, props);
+
+    new Function(this, 'MyLambda', {
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.NODEJS_14_X,
+    });
+  }
+}
+
+interface PythonTestStackProps extends StackProps {
+  readonly handler?: string;
+}
+
+class PythonTestStack extends Stack {
+  constructor(scope: Construct, id: string, props: PythonTestStackProps = {}) {
+    super(scope, id, props);
+
+    new Function(this, 'MyLambda', {
+      code: new InlineCode('foo'),
+      handler: props.handler || 'index.handler',
+      runtime: Runtime.PYTHON_3_9,
+    });
+  }
+}
+
+class NodejsAliasTestStack extends Stack {
+  constructor(scope: Construct, id: string, props: StackProps = {}) {
+    super(scope, id, props);
+
+    const func = new Function(this, 'MyLambda', {
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.NODEJS_14_X,
+    });
+
+    const version = func.currentVersion;
+    new Alias(this, 'MyLambdaAlias', {
+      aliasName: 'Alias1',
+      provisionedConcurrentExecutions: 42,
+      version,
+    });
+  }
+}
+
+interface LumigoStackProps extends StackProps {
+  readonly lumigo: Lumigo;
+  readonly lumigoTag?: string;
+}
+
+class NodejsTestSingleLambdaStack extends Stack {
+  constructor(scope: Construct, id: string, props: LumigoStackProps) {
+    super(scope, id, props);
+
+    const handler = new Function(this, 'MyLambda', {
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.NODEJS_14_X,
+    });
+
+    props.lumigo.traceLambda(handler, {
+      lumigoTag: props.lumigoTag,
+    });
+  }
+}
+
+class PythonTestSingleLambdaStack extends Stack {
+  constructor(scope: Construct, id: string, props: LumigoStackProps) {
+    super(scope, id, props);
+
+    const handler = new Function(this, 'MyLambda', {
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.PYTHON_3_9,
+    });
+
+    props.lumigo.traceLambda(handler, {
+      lumigoTag: props.lumigoTag,
+    });
+  }
+}
+
+class NodejsTestOverrideAwsLambdaExecWrapperEnvVarsStack extends Stack {
+  constructor(scope: Construct, id: string, props: LumigoStackProps) {
+    super(scope, id, props);
+
+    const handler = new Function(this, 'MyLambda', {
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.NODEJS_14_X,
+    });
+
+    props.lumigo.traceLambda(handler);
+
+    handler.addEnvironment('AWS_LAMBDA_EXEC_WRAPPER', '');
+  }
+}
+
+class NodejsTestOverrideLumigoTracerTokenWrapperEnvVarsStack extends Stack {
+  constructor(scope: Construct, id: string, props: LumigoStackProps) {
+    super(scope, id, props);
+
+    const handler = new Function(this, 'MyLambda', {
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.NODEJS_14_X,
+    });
+
+    props.lumigo.traceLambda(handler);
+
+    handler.addEnvironment('LUMIGO_TRACER_TOKEN', '');
+  }
+}
+
+class NodejsTestOverrideLumigoLayerStack extends Stack {
+  constructor(scope: Construct, id: string, props: LumigoStackProps) {
+    super(scope, id, props);
+
+    const handler = new Function(this, 'MyLambda', {
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.NODEJS_14_X,
+    });
+
+    props.lumigo.traceLambda(handler);
+
+    handler.addLayers(LayerVersion.fromLayerVersionArn(handler, 'AdditionaLayer', `arn:aws:lambda:${handler.env.region!}:114300393969:layer:000`));
+  }
+}
+
+class NodejsTestSingleLambdaPinnedLayerVersionStack extends Stack {
+  constructor(scope: Construct, id: string, props: LumigoStackProps) {
+    super(scope, id, props);
+
+    const handler = new Function(this, 'MyLambda', {
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.NODEJS_14_X,
+    });
+
+    props.lumigo.traceLambda(handler, {
+      layerVersion: 42,
+    });
+  }
+}
+
+class PythonTestSingleLambdaPinnedLayerVersionStack extends Stack {
+  constructor(scope: Construct, id: string, props: LumigoStackProps) {
+    super(scope, id, props);
+
+    const handler = new Function(this, 'MyLambda', {
+      code: new InlineCode('foo'),
+      handler: 'index.handler',
+      runtime: Runtime.PYTHON_3_9,
+    });
+
+    props.lumigo.traceLambda(handler, {
+      layerVersion: 42,
+    });
+  }
+}

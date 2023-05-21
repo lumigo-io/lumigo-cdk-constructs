@@ -124,8 +124,8 @@ const LUMIGO_INJECTOR_ENV_VAR_VALUE = `${LUMIGO_INJECTOR_VOLUME_MOUNT_POINT}/inj
 
 const DEFAULT_LUMIGO_TRACE_PROPS: LumigoTraceProps = {
   traceLambda: true,
-  traceEcs: false, // For now it's experimental
-  lambdaEnableW3CTraceContext: false,
+  traceEcs: true,
+  lambdaEnableW3CTraceContext: true,
 };
 
 const DEFAULT_TRACE_ECS_TASK_DEFINITION_PROPS: TraceEcsTaskDefinitionProps = {
@@ -290,8 +290,6 @@ export class Lumigo {
   public traceEcsService(service: SupportedEcsService, props: TraceEcsServiceDefinitionProps = {
     applyAutoTraceTag: true,
   }) {
-    this.warning(service, 'Autotracing of ECS workloads is experimental; if you find any issues, please let us know at https://support.lumigo.io!');
-
     this.doTraceEcsTaskDefinition(service.taskDefinition, {
       applyAutoTraceTag: false,
       lumigoAutoTraceImage: props.lumigoAutoTraceImage,
@@ -307,7 +305,6 @@ export class Lumigo {
   }
 
   public traceEcsTaskDefinition(taskDefinition: TaskDefinition, props: TraceEcsTaskDefinitionProps = DEFAULT_TRACE_ECS_TASK_DEFINITION_PROPS) {
-    this.warning(taskDefinition, 'Autotracing of ECS workloads is experimental; if you find any issues, please let us know at https://support.lumigo.io!');
     this.doTraceEcsTaskDefinition(taskDefinition, props);
   }
 
@@ -485,11 +482,10 @@ export class Lumigo {
       lambda.node.addValidation(new HasLumigoPythonHandlerInResourceValidation(lambda));
     }
 
-    if (!!props.enableW3CTraceContext) {
-      lambda.addEnvironment(LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME, String(true));
+    const enableW3CTraceContext = !!props.enableW3CTraceContext;
+    lambda.addEnvironment(LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME, String(enableW3CTraceContext));
 
-      lambda.node.addValidation(new HasLumigoPropagateW3CEnvVarValidation(lambda));
-    }
+    lambda.node.addValidation(new HasLumigoPropagateW3CEnvVarValidation(lambda, enableW3CTraceContext));
 
     if (!!props.applyAutoTraceTag) {
       this.applyAutotraceTag(lambda);
@@ -883,9 +879,11 @@ class HasAwsLambdaOriginalHandlerEnvVarValidation implements IValidation {
 class HasLumigoPropagateW3CEnvVarValidation implements IValidation {
 
   private readonly lambda: SupportedLambdaFunction;
+  private readonly expectedValue: boolean;
 
-  constructor(lambda: SupportedLambdaFunction) {
+  constructor(lambda: SupportedLambdaFunction, expectedValue: boolean) {
     this.lambda = lambda;
+    this.expectedValue = expectedValue;
   }
 
   public validate(): string[] {
@@ -905,8 +903,8 @@ class HasLumigoPropagateW3CEnvVarValidation implements IValidation {
       'value': value,
     } = environment[LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME];
 
-    if (value !== 'true') {
-      return [`The '${LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME}' environment variable has a different value than the expected 'true'.`];
+    if (value !== String(this.expectedValue)) {
+      return [`The '${LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME}' environment variable has a different value than the expected '${this.expectedValue}'.`];
     }
 
     return [];

@@ -1,6 +1,6 @@
 # Lumigo CDK Integrations
 
-This repository provides means of adding Lumigo tracing as "infrastructure-as-code" to Lambda functions deployed via the [AWS Cloud Development Kit (CDK) v2](https://docs.aws.amazon.com/cdk/api/v2/).
+This repository provides means of adding Lumigo tracing as "infrastructure-as-code" to Lambda functions and ECS workloads deployed via the [AWS Cloud Development Kit (CDK) v2](https://docs.aws.amazon.com/cdk/api/v2/).
 
 If instead of the AWS CDK v2, you are using the [Serverless Framework](https://www.serverless.com/), refer to the [`serverless-lumigo` plugin](https://github.com/lumigo-io/serverless-lumigo-plugin) documentation.
 
@@ -34,9 +34,7 @@ The Lumigo CDK integration applies automated distributed tracing to the followin
 
 #### Supported Amazon ECS Constructs
 
-**Note:** The automatic instrumentation of Amazon ECS workloads is currently **experimental**.
-
-The Lumigo CDK integration applies automated distributed tracing to the following constructs that manage Amazon ECS workloads:
+The Lumigo CDK integration applies automated distributed tracing to Java, Node.js and Python applications run on Amazon ECS and managed by the following constructs:
 
 | AWS CDK Package | Constructs | Notes |
 |-----------------|------------|-------|
@@ -57,7 +55,7 @@ The Lumigo CDK integration applies automated distributed tracing to the followin
 | [`aws-cdk-lib/aws-ecs-patterns`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs_patterns-readme.html) | [`ScheduledEc2Task`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs_patterns.ScheduledEc2Task.html) | Experimental [Node.js](https://github.com/lumigo-io/opentelemetry-js-distro#supported-packages) and [Python](https://github.com/lumigo-io/opentelemetry-python-distro#supported-packages) distributed tracing |
 | [`aws-cdk-lib/aws-ecs-patterns`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs_patterns-readme.html) | [`ScheduledFargateTask`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs_patterns.ScheduledFargateTask.html) | Experimental [Node.js](https://github.com/lumigo-io/opentelemetry-js-distro#supported-packages) and [Python](https://github.com/lumigo-io/opentelemetry-python-distro#supported-packages) distributed tracing |
 
-The automated distributed tracing will work for all Node.js and Python processes [dynamically linked](https://stackoverflow.com/questions/311882/what-do-statically-linked-and-dynamically-linked-mean) against [GNU C Library](https://www.gnu.org/software/libc/) (which is used by virtually all container base images except [Alpine Linux](https://www.alpinelinux.org/)) or [musl libc](https://musl.libc.org/) (for [Alpine Linux](https://www.alpinelinux.org/)-based containers).
+The automated distributed tracing will work for all Java, Node.js and Python processes [dynamically linked](https://stackoverflow.com/questions/311882/what-do-statically-linked-and-dynamically-linked-mean) against [GNU C Library](https://www.gnu.org/software/libc/) (which is used by virtually all container base images except [Alpine Linux](https://www.alpinelinux.org/)) or [musl libc](https://musl.libc.org/) (for [Alpine Linux](https://www.alpinelinux.org/)-based containers).
 
 ## Usage
 
@@ -79,24 +77,7 @@ const app = new App();
 
 // Add here stacks and constructs
 
-new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(app); // This will trace all Lambda functions managed with supported constructs
-
-app.synth();
-```
-
-Currently, the autotrace injection of Amazon ECS workloads is opt-in:
-
-```typescript
-import { Lumigo } from '@lumigo/cdk-constructs-v2';
-import { App, SecretValue } from 'aws-cdk-lib';
-
-const app = new App();
-
-// Add here stacks and constructs
-
-new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(app, {
-  traceEcs: true,  // This activates adding tracing to Amazon ECS task definitions and services as well
-});
+new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(app); // This will trace all Lambda functions and ECS workloads managed with supported constructs
 
 app.synth();
 ```
@@ -119,7 +100,7 @@ export class NodejsStack extends Stack {
         new Function(this, 'MyLambda', {
             code: new InlineCode('foo'),
             handler: 'index.handler',
-            runtime: Runtime.NODEJS_14_X,
+            runtime: Runtime.NODEJS_18_X,
         });
 
     }
@@ -135,47 +116,6 @@ const stack = new NodejsStack(app, 'NodejsTestStack', {
 }); 
 
 new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(stack);
-
-app.synth();
-```
-
-```typescript
-import { Lumigo } from '@lumigo/cdk-constructs-v2';
-import { App, SecretValue, Stack, StackProps } from 'aws-cdk-lib';
-import { FargateService } from 'aws-cdk-lib/aws-ecs';
-import { Function } from 'aws-cdk-lib/aws-lambda';
-import { Construct } from 'constructs';
-
-export class NodejsStack extends Stack {
-
-    constructor(scope: Construct, id: string, props: StackProps = {}) {
-        super(scope, id, props);
-
-        new Function(this, 'MyLambda', {
-            code: new InlineCode('foo'),
-            handler: 'index.handler',
-            runtime: Runtime.NODEJS_14_X,
-        });
-
-        new FargateService(this, 'MyFargateService', {
-            ...
-        });
-
-    }
-
-}
-
-const app = new App();
-
-const stack = new NodejsStack(app, 'NodejsTestStack', {
-    env: {
-        region: 'eu-central-1',
-    }
-}); 
-
-new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(stack, {
-  traceEcs: true,  // This activates adding tracing to Amazon ECS task definitions and services as well  
-});
 
 app.synth();
 ```
@@ -200,7 +140,7 @@ export class NodejsStack extends Stack {
         const handler = new Function(this, 'MyLambda', {
             code: new InlineCode('foo'),
             handler: 'index.handler',
-            runtime: Runtime.NODEJS_14_X,
+            runtime: Runtime.NODEJS_18_X,
         });
 
         props.lumigo.traceLambda(handler);
@@ -372,8 +312,7 @@ const app = new App();
 // Add here stacks and constructs
 
 new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(app, {
-    traceEcs: true,
-    lumigoAutoTraceImage: 'public.ecr.aws/lumigo/lumigo-autotrace:v12',  // See https://gallery.ecr.aws/lumigo/lumigo-autotrace for the list of currently available tags
+    lumigoAutoTraceImage: 'public.ecr.aws/lumigo/lumigo-autotrace:v14',  // See https://gallery.ecr.aws/lumigo/lumigo-autotrace for the list of currently available tags
 });
 
 app.synth();
@@ -407,10 +346,11 @@ Behind the scenes, the Lumigo CDK integration sets the AWS Tag `LUMIGO_TAG` with
 
 ### W3C TraceContext propagation in AWS Lambda
 
-To be able to trace scenarios in which a Lambda function sends HTTP requests to an application instrumented with OpenTelemetry, like those using the [Lumigo OpenTelemetry Distro for Java](https://github.com/lumigo-io/opentelemetry-java-distro), [Lumigo OpenTelemetry Distro for JS](https://github.com/lumigo-io/opentelemetry-js-distro) and [Lumigo OpenTelemetry Distro for Python](https://github.com/lumigo-io/opentelemetry-python-distro) or other OpenTelemetry SDKs, the Lumigo Node.js and Python tracers can optionally add [W3C TraceContext](https://www.w3.org/TR/trace-context/) HTTP headers to outgoing requests.
+To be able to trace scenarios in which a Lambda function sends HTTP requests to an application instrumented with OpenTelemetry, like those using the [Lumigo OpenTelemetry Distro for Java](https://github.com/lumigo-io/opentelemetry-java-distro), [Lumigo OpenTelemetry Distro for JS](https://github.com/lumigo-io/opentelemetry-js-distro) and [Lumigo OpenTelemetry Distro for Python](https://github.com/lumigo-io/opentelemetry-python-distro) or other OpenTelemetry SDKs, the Lumigo Node.js and Python tracers can add [W3C TraceContext](https://www.w3.org/TR/trace-context/) HTTP headers to outgoing requests.
 
-Aty the tracer level, the support of W3C TraceContext is currently opt-in via the `LUMIGO_PROPAGATE_W3C=true` environment variable.
-But the Lumigo CDK integration can apply it to all your Lambda functions:
+At the tracer level, the support of W3C TraceContext is regulated via the `LUMIGO_PROPAGATE_W3C` environment variable.
+The Lumigo CDK integration will turn on the W3C TraceContext for all your Lambda functions by default.
+If your Lambda functions are using some request-signing mechanism, and you wish to turn off W3C TraceContext propagation, set the `lambdaEnableW3CTraceContext` to `false` as follows:
 
 ```typescript
 import { Lumigo } from '@lumigo/cdk-constructs-v2';
@@ -421,13 +361,13 @@ const app = new App();
 // Add here stacks and constructs
 
 new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(app, {
-    lambdaEnableW3CTraceContext: true, // <--- This parameter set to true activates the W3C TraceContext propagation for all supported Lambda functions
+    lambdaEnableW3CTraceContext: false, // <--- This parameter set to false dectivates the W3C TraceContext propagation for all supported Lambda functions
 });
 
 app.synth();
 ```
 
-Activating W3C TraceContext support is also supported on a function-by-function basis:
+Deactivating W3C TraceContext support is also supported on a function-by-function basis:
 
 ```typescript
 export class MyNodejsLambdaStack extends Stack {
@@ -437,17 +377,15 @@ export class MyNodejsLambdaStack extends Stack {
     const handler = new Function(this, 'MyLambda', {
       code: new InlineCode('foo'),
       handler: 'index.handler',
-      runtime: Runtime.NODEJS_14_X,
+      runtime: Runtime.NODEJS_20_X,
     });
 
     props.lumigo.traceLambda(handler, {
-      enableW3CTraceContext: true,  // <--- This parameter set to true activates the W3C TraceCntext propagation for this Lambda function.
+      enableW3CTraceContext: false,  // <--- This parameter set to false deactivates the W3C TraceCntext propagation for this Lambda function.
     });
   }
 }
 ```
-
-The Lumigo tracers used for ECS tracing natively use the W3C TraceContext standard, and no opt-in is necessary.
 
 ## How does it work?
 
