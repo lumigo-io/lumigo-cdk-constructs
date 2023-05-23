@@ -311,21 +311,24 @@ export class Lumigo {
   private lumigoTokenAsEcsSecret(scope: Construct): Secret | undefined {
     if (!this.ecsSecrets.has(scope)) {
       const ref = (this.props.lumigoToken as any).rawValue;
-      const res = (ref as any).value.match(/{{resolve:([^:]+):([^:]+)(?:([^:]*)(?:.*)?)?}}/);
-      if (res) {
-        const service = res[1];
-        const secretName = res[2];
-        const other = res[3];
-        switch (service) {
+
+      if (ref.value.match(/{{resolve:\S+}}/)) {
+        const tokens = ref.value.substring('{{resolve:'.length, ref.value.length - 2).split(':');
+
+        switch (tokens[0]) {
           case CfnDynamicReferenceService.SECRETS_MANAGER: {
-            const field = other ? other : undefined;
-            this.ecsSecrets.set(scope, Secret.fromSecretsManager(SecretManagerSecret.fromSecretNameV2(scope, 'lumigoTokenSMS', secretName), field));
+            // Secret Manager: '{{resolve:secretsmanager:<secretName>:SecretString:<fieldName>::}}'
+            const secretName = tokens[1];
+            const fieldName = (tokens.length > 3) ? tokens[3] : undefined;
+            this.ecsSecrets.set(scope, Secret.fromSecretsManager(SecretManagerSecret.fromSecretNameV2(scope, 'lumigoTokenSMS', secretName), fieldName));
             break;
           }
           case CfnDynamicReferenceService.SSM_SECURE: {
-            const parameterVersion = other ? Number(other) : undefined;
+            // SSM-secure: '{{resolve:ssm-secure:<parameterName>:<version>}}'
+            const parameterName = tokens[1];
+            const parameterVersion = (tokens.length > 2) ? Number(tokens[2]) : undefined;
             this.ecsSecrets.set(scope, Secret.fromSsmParameter(StringParameter.fromSecureStringParameterAttributes(scope, 'lumigoTokenSSM', {
-              parameterName: secretName,
+              parameterName,
               version: parameterVersion,
             })));
             break;

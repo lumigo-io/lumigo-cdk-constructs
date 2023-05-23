@@ -109,9 +109,14 @@ class QueueProcessingFargateServiceStack extends Stack {
 
 };
 
+class CheckInjectionOptions {
+  expectedContainerImage?: string = DEFAULT_LUMIGO_INJECTOR_IMAGE_NAME;
+  expectedSecretSuffix?: string = '';
+}
+
 describe('ECS tracing injection', () => {
 
-  function checkInjectionOccurred(taskDefinition: TaskDefinition, expectedContainerImage = DEFAULT_LUMIGO_INJECTOR_IMAGE_NAME) {
+  function checkInjectionOccurred(taskDefinition: TaskDefinition, options: CheckInjectionOptions = {}) {
     const containers: ContainerDefinition[] = (taskDefinition as any).containers;
 
     expect(containers).toHaveLength(2);
@@ -123,7 +128,7 @@ describe('ECS tracing injection', () => {
     expect(volumes[0].efsVolumeConfiguration).toBeUndefined();
 
     const lumigoInjectorContainer = containers.find(container => container.containerName === 'lumigo-injector')!;
-    expect(lumigoInjectorContainer.imageName).toBe(expectedContainerImage);
+    expect(lumigoInjectorContainer.imageName).toBe(options.expectedContainerImage || DEFAULT_LUMIGO_INJECTOR_IMAGE_NAME);
     expect(lumigoInjectorContainer.containerDependencies).toHaveLength(0);
     expect(lumigoInjectorContainer.mountPoints).toContainEqual({
       sourceVolume: 'lumigo-injector',
@@ -135,7 +140,15 @@ describe('ECS tracing injection', () => {
     const environment = (appContainer as any).environment as {[key: string]: string};
     const secrets = (appContainer as any).secrets as CfnTaskDefinition.SecretProperty[];
     expect(secrets).toHaveLength(1); // No duplicate LUMIGO_TRACER_TOKEN entries
-    expect(secrets[0]).toHaveProperty('name', 'LUMIGO_TRACER_TOKEN');
+
+    if (!!options.expectedSecretSuffix) {
+      expect(secrets[0]).toMatchObject({
+        name: 'LUMIGO_TRACER_TOKEN',
+        valueFrom: expect.stringMatching(`arn:.*:${options.expectedSecretSuffix}`),
+      });
+    } else {
+      expect(secrets[0]).toHaveProperty('name', 'LUMIGO_TRACER_TOKEN');
+    }
     expect(environment.LD_PRELOAD).toBe('/opt/lumigo/injector/lumigo_injector.so');
 
     expect(appContainer.mountPoints).toContainEqual({
@@ -166,15 +179,15 @@ describe('ECS tracing injection', () => {
       const serviceConstruct = root.node.children
         .find(construct => construct instanceof QueueProcessingFargateService) as QueueProcessingFargateService;
 
-      checkInjectionOccurred(serviceConstruct.taskDefinition);
+      checkInjectionOccurred(serviceConstruct.taskDefinition, {
+        expectedSecretSuffix: 'secret:LumigoToken',
+      });
     });
 
     test('works with the Lumigo Token specified as SSM parameter with version', () => {
       const app = new App();
 
-      new Lumigo({ lumigoToken: SecretValue.ssmSecure('LumigoToken', '42') }).traceEverything(app, {
-        traceEcs: true,
-      });
+      new Lumigo({ lumigoToken: SecretValue.ssmSecure('LumigoToken', '42') }).traceEverything(app);
 
       const root = new QueueProcessingFargateServiceStack(app, 'TestService');
 
@@ -183,7 +196,13 @@ describe('ECS tracing injection', () => {
       const serviceConstruct = root.node.children
         .find(construct => construct instanceof QueueProcessingFargateService) as QueueProcessingFargateService;
 
-      checkInjectionOccurred(serviceConstruct.taskDefinition);
+      checkInjectionOccurred(serviceConstruct.taskDefinition, {
+        /*
+         * TODO Update test when support for versions in SSM params is available in AWS
+         * https://github.com/aws/aws-cdk/issues/8405
+         */
+        expectedSecretSuffix: 'parameter/LumigoToken',
+      });
     });
 
     test('works with the Lumigo Token specified as SSM parameter without version', () => {
@@ -200,7 +219,9 @@ describe('ECS tracing injection', () => {
       const serviceConstruct = root.node.children
         .find(construct => construct instanceof QueueProcessingFargateService) as QueueProcessingFargateService;
 
-      checkInjectionOccurred(serviceConstruct.taskDefinition);
+      checkInjectionOccurred(serviceConstruct.taskDefinition, {
+        expectedSecretSuffix: 'parameter/LumigoToken',
+      });
     });
 
     test('supports overriding the container image', () => {
@@ -217,7 +238,9 @@ describe('ECS tracing injection', () => {
 
       app.synth();
 
-      checkInjectionOccurred(root.taskDefinition, expectedContainerImage);
+      checkInjectionOccurred(root.taskDefinition, {
+        expectedContainerImage,
+      });
     });
 
     test('is idempotent', () => {
@@ -287,7 +310,9 @@ describe('ECS tracing injection', () => {
 
       app.synth();
 
-      checkInjectionOccurred(root.taskDefinition, expectedContainerImage);
+      checkInjectionOccurred(root.taskDefinition, {
+        expectedContainerImage,
+      });
     });
 
     test('is idempotent', () => {
@@ -361,7 +386,9 @@ describe('ECS tracing injection', () => {
 
       app.synth();
 
-      checkInjectionOccurred(taskDefinition, expectedContainerImage);
+      checkInjectionOccurred(taskDefinition, {
+        expectedContainerImage,
+      });
     });
 
     test('is idempotent', () => {
