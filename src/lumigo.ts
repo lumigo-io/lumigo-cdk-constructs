@@ -521,6 +521,17 @@ export class Lumigo {
       case Runtime.PYTHON_3_9:
         return LambdaLayerType.PYTHON;
       default:
+        if (!lambda.runtime && lambda instanceof NodejsFunction) {
+          /*
+           * The NodejsType has the runtime as optional, and then the
+           * function will use the default one. The default runtime type
+           * is set up conservatively in AWS CDK, with older versions,
+           * long supported by Lumigo. So we can rely on the type of
+           * the construct to tell us the layer type.
+           */
+          return LambdaLayerType.NODE;
+        }
+
         /*
          * Check if it is enumeration entries that do not
          * exist in the minimum CDK version we support.
