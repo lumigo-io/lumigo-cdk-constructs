@@ -72,11 +72,13 @@
     }
   },
   "keywords": [
-    "Cloud-native",
-    "Infrastructure-as-code",
-    "Observability",
-    "Serverless",
-    "cdk"
+    "awscdk",
+    "cdk",
+    "cloud-native",
+    "infrastructure-as-code",
+    "observability",
+    "serverless",
+    "tracing"
   ],
   "main": "lib/index.js",
   "license": "Apache-2.0",

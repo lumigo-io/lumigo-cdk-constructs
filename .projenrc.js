@@ -25,7 +25,14 @@ const project = new awscdk.AwsCdkConstructLibrary({
     `@aws-cdk/aws-lambda-python-alpha@${baselineCdkVersion}-${pythonAlphaVersionSuffix}`,
   ],
   packageName: '@lumigo/cdk-constructs-v2', /* The "name" in package.json. */
-  keywords: ['Observability', 'Serverless', 'Cloud-native', 'Infrastructure-as-code'],
+  keywords: [
+    'awscdk',
+    'cloud-native',
+    'infrastructure-as-code',
+    'observability',
+    'serverless',
+    'tracing',
+  ],
   majorVersion: 0,
   projenTokenSecret: 'GITHUB_TOKEN',
 });

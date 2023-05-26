@@ -4,6 +4,22 @@ This repository provides means of adding Lumigo tracing as "infrastructure-as-co
 
 If instead of the AWS CDK v2, you are using the [Serverless Framework](https://www.serverless.com/), refer to the [`serverless-lumigo` plugin](https://github.com/lumigo-io/serverless-lumigo-plugin) documentation.
 
+With the Lumigo CDK Constructs, getting your Lambda and ECS workloads monitored by Lumigo across your entire CDK applciation is as easy as:
+
+```typescript
+import { Lumigo } from '@lumigo/cdk-constructs-v2';
+import { App, SecretValue } from 'aws-cdk-lib';
+
+const app = new App();
+
+// Add here stacks and constructs
+
+ // This will trace all Lambda functions and ECS workloads managed with supported constructs
+new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(app);
+
+app.synth();
+```
+
 ## Installation
 
 ### TypeScript / JavaScript
@@ -28,7 +44,7 @@ The Lumigo CDK integration applies automated distributed tracing to the followin
 
 | AWS CDK Package | Constructs | Notes |
 |-----------------|------------|-------|
-| [`aws-cdk-lib/aws-lambda`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda-readme.html) | [`Function`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda.Function.html) | |
+| [`aws-cdk-lib/aws-lambda`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda-readme.html) | [`Function`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda.Function.html) | Lumigo tracing will be added to the supported `nodejs` and `python3.x` runtimes; `provided` runtimes will not be instrumented. |
 | [`aws-cdk-lib/aws-lambda-nodejs`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda_nodejs-readme.html) | [`NodejsFunction`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda_nodejs.NodejsFunction.html) | |
 | [`@aws-cdk/aws-lambda-python-alpha`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-lambda-python-alpha-readme.html) | [`PythonFunction`](https://docs.aws.amazon.com/cdk/api/v2/docs/@aws-cdk_aws-lambda-python-alpha.PythonFunction.html) | The `PythonFunction` is not GA in AWS CDK 2, but is supported by the Lumigo CDK integration regardless |
 
