@@ -1,5 +1,7 @@
 # Lumigo CDK Integrations
 
+[![View on Construct Hub](https://constructs.dev/badge?package=%40lumigo%2Fcdk-constructs-v2)](https://constructs.dev/packages/@lumigo/cdk-constructs-v2)
+
 This repository provides means of adding Lumigo tracing as "infrastructure-as-code" to Lambda functions and ECS workloads deployed via the [AWS Cloud Development Kit (CDK) v2](https://docs.aws.amazon.com/cdk/api/v2/).
 
 If instead of the AWS CDK v2, you are using the [Serverless Framework](https://www.serverless.com/), refer to the [`serverless-lumigo` plugin](https://github.com/lumigo-io/serverless-lumigo-plugin) documentation.
