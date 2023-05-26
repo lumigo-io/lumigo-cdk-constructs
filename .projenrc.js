@@ -1,5 +1,3 @@
-const { readFileSync, writeFileSync } = require('fs');
-const { join } = require('path');
 const { awscdk } = require('projen');
 const baselineCdkVersion = '2.42.1';
 const pythonAlphaVersionSuffix = 'alpha.0';
@@ -36,23 +34,9 @@ const project = new awscdk.AwsCdkConstructLibrary({
   majorVersion: 0,
   projenTokenSecret: 'GITHUB_TOKEN',
 });
+project.package.addField('peerDependenciesMeta', {
+  '@aws-cdk/aws-lambda-python-alpha': {
+    optional: true,
+  },
+});
 project.synth();
-/*
- * Patch package.json to mark `@aws-cdk/aws-lambda-python-alpha` as optional, which is not supported by Projen,
- * see https://github.com/projen/projen/issues/2660
- */
-const packageJsonPath = join(__dirname, 'package.json');
-const packageJson = JSON.parse(readFileSync(packageJsonPath));
-
-const packageJsonEntries = Object.entries(packageJson);
-packageJsonEntries.splice(
-  // Insert `peerDependenciesMeta` right after `peerDependencies`, because beautiful JSON parses fastah
-  packageJsonEntries.findIndex(([key, _]) => 'peerDependencies' === key) + 1,
-  0,
-  ['peerDependenciesMeta', {
-    '@aws-cdk/aws-lambda-python-alpha': {
-      optional: true,
-    },
-  }],
-);
-writeFileSync(packageJsonPath, JSON.stringify(Object.fromEntries(packageJsonEntries), null, 2));

@@ -17,7 +17,7 @@ const lumigoProps: LumigoProps = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#@lumigo/cdk-constructs-v2.LumigoProps.property.lumigoToken">lumigoToken</a></code> | <code>aws-cdk-lib.SecretValue</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoProps.property.lumigoToken">lumigoToken</a></code> | <code>aws-cdk-lib.SecretValue</code> | A reference to a secret containing of the Lumigo token of the Lumigo project to be used with instrumented Lambda functions and ECS workloads. |
 
 ---
 
@@ -28,6 +28,11 @@ public readonly lumigoToken: SecretValue;
 ```
 
 - *Type:* aws-cdk-lib.SecretValue
+
+A reference to a secret containing of the Lumigo token of the Lumigo project to be used with instrumented Lambda functions and ECS workloads.
+
+Instructions on how to retrieve your Lumigo token are available in the [Lumigo tokens](https://docs.lumigo.io/docs/tags) documentation.
+For more information concerning how AWS CDK 2 handles secrets, consult the [AWS SDK `SecretValue`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.SecretValue.html) documentation.
 
 ---
 
@@ -45,14 +50,14 @@ const lumigoTraceProps: LumigoTraceProps = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lambdaEnableW3CTraceContext">lambdaEnableW3CTraceContext</a></code> | <code>boolean</code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lambdaNodejsLayerVersion">lambdaNodejsLayerVersion</a></code> | <code>number</code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lambdaPythonLayerVersion">lambdaPythonLayerVersion</a></code> | <code>number</code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lumigoAutoTraceImage">lumigoAutoTraceImage</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.traceEcs">traceEcs</a></code> | <code>boolean</code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.traceLambda">traceLambda</a></code> | <code>boolean</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | Whether the Lumigo CDK constructs should automatically add the `lumigo:auto-trace` AWS tag with the version of the construct in use. |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lambdaEnableW3CTraceContext">lambdaEnableW3CTraceContext</a></code> | <code>boolean</code> | Whether the Lumigo Lambda tracers will add the [W3C Trace Context](https://www.w3.org/TR/trace-context/) `traceparent` and `tracestate` HTTP headers to outgoing HTTP/HTTPS requests. These headers are necessary to correctly correlate the HTTP requests from Lambda to workloads instrumented with the Lumigo OpenTelemetry distributions. The only real case in which this property should be set to false, is if there is some HTTP request issued by the Lambda function that is going towards an API with request signature that is affected negatively by the additional headers. If you encounter such an occurrence, please get in touch with [Lumigo's support](https://support.lumigo.io); we will issue an update to the Lumigo Lambda tracers to automatically not add [W3C Trace Context](https://www.w3.org/TR/trace-context/) to those APIs. |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lambdaNodejsLayerVersion">lambdaNodejsLayerVersion</a></code> | <code>number</code> | Which version of the `lumigo-node-tracer` AWS Lambda layer to be used when instrumenting AWS Lambda functions using a supported Node.js runtime. Available layer versions depend on the AWS region your Lambda function is deployed in, see the [`lumigo-node-tracer` versions](https://github.com/lumigo-io/lumigo-node/tree/master/layers) list. The default value is the latest Node.js layer at the time of release of this version of the Lumigo CDK constructs: [default Node.js versions](./src/lambda_layers_nodejs.json). |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lambdaPythonLayerVersion">lambdaPythonLayerVersion</a></code> | <code>number</code> | Which version of the `lumigo-python-tracer` AWS Lambda layer to be used when instrumenting AWS Lambda functions using a supported Python runtime. |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lumigoAutoTraceImage">lumigoAutoTraceImage</a></code> | <code>string</code> | Which container image to use to instrument ECS workloads. |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | Which Lumigo tag to apply to your instrumented Lambda functions and ECS workloads. |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.traceEcs">traceEcs</a></code> | <code>boolean</code> | Whether to automatically trace all the Java, Node.js and Python Lambda functions deployed on ECS by this construct using the respective [Lumigo OpenTelemetry distributions](https://docs.lumigo.io/docs/containerized-applications). |
+| <code><a href="#@lumigo/cdk-constructs-v2.LumigoTraceProps.property.traceLambda">traceLambda</a></code> | <code>boolean</code> | Whether to automatically trace all the Node.js and Python Lambda functions in this construct using [Lumigo Lambda auto-instrumentation](https://docs.lumigo.io/docs/auto-instrumentation). |
 
 ---
 
@@ -63,6 +68,9 @@ public readonly applyAutoTraceTag: boolean;
 ```
 
 - *Type:* boolean
+- *Default:* true
+
+Whether the Lumigo CDK constructs should automatically add the `lumigo:auto-trace` AWS tag with the version of the construct in use.
 
 ---
 
@@ -73,6 +81,9 @@ public readonly lambdaEnableW3CTraceContext: boolean;
 ```
 
 - *Type:* boolean
+- *Default:* true
+
+Whether the Lumigo Lambda tracers will add the [W3C Trace Context](https://www.w3.org/TR/trace-context/) `traceparent` and `tracestate` HTTP headers to outgoing HTTP/HTTPS requests. These headers are necessary to correctly correlate the HTTP requests from Lambda to workloads instrumented with the Lumigo OpenTelemetry distributions. The only real case in which this property should be set to false, is if there is some HTTP request issued by the Lambda function that is going towards an API with request signature that is affected negatively by the additional headers. If you encounter such an occurrence, please get in touch with [Lumigo's support](https://support.lumigo.io); we will issue an update to the Lumigo Lambda tracers to automatically not add [W3C Trace Context](https://www.w3.org/TR/trace-context/) to those APIs.
 
 ---
 
@@ -84,6 +95,8 @@ public readonly lambdaNodejsLayerVersion: number;
 
 - *Type:* number
 
+Which version of the `lumigo-node-tracer` AWS Lambda layer to be used when instrumenting AWS Lambda functions using a supported Node.js runtime. Available layer versions depend on the AWS region your Lambda function is deployed in, see the [`lumigo-node-tracer` versions](https://github.com/lumigo-io/lumigo-node/tree/master/layers) list. The default value is the latest Node.js layer at the time of release of this version of the Lumigo CDK constructs: [default Node.js versions](./src/lambda_layers_nodejs.json).
+
 ---
 
 ##### `lambdaPythonLayerVersion`<sup>Optional</sup> <a name="lambdaPythonLayerVersion" id="@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lambdaPythonLayerVersion"></a>
@@ -93,6 +106,11 @@ public readonly lambdaPythonLayerVersion: number;
 ```
 
 - *Type:* number
+
+Which version of the `lumigo-python-tracer` AWS Lambda layer to be used when instrumenting AWS Lambda functions using a supported Python runtime.
+
+Available layer versions depend on the AWS region your Lambda function is deployed in, see the [`lumigo-python-tracer` versions](https://github.com/lumigo-io/python_tracer/tree/master/layers) list.
+The default value is the latest Python layer at the time of release of this version of the Lumigo CDK constructs: [default Python versions](./src/lambda_layers_python.json).
 
 ---
 
@@ -104,6 +122,14 @@ public readonly lumigoAutoTraceImage: string;
 
 - *Type:* string
 
+Which container image to use to instrument ECS workloads.
+
+Use a valid, full image name of the [`lumigo/lumigo-autotrace` image](https://gallery.ecr.aws/lumigo/lumigo-autotrace), e.g., `public.ecr.aws/lumigo/lumigo-autotrace:v14`.
+
+This property is exposed to support two use-cases: pinning a specific tag of the `lumigo/lumigo-autotrace` image, or supporting use-cases where Amazon ECS will not be able to pull from the Amazon ECS Public Gallery registry.
+The available tags are listed on the [`lumigo/lumigo-autotrace` Amazon ECR Public Gallery](https://gallery.ecr.aws/lumigo/lumigo-autotrace) page.
+The default value is the latest tag at the time of release of this version of the Lumigo CDK constructs: [default `lumigo/lumigo-autotrace` image](./src/lumigo_autotrace_image.json)
+
 ---
 
 ##### `lumigoTag`<sup>Optional</sup> <a name="lumigoTag" id="@lumigo/cdk-constructs-v2.LumigoTraceProps.property.lumigoTag"></a>
@@ -114,6 +140,11 @@ public readonly lumigoTag: string;
 
 - *Type:* string
 
+Which Lumigo tag to apply to your instrumented Lambda functions and ECS workloads.
+
+Lumigo Tags add dimension to your Lambda functions so that they can be identified, managed, organized, searched for, and filtered in Lumigo.
+For more information on Lumigo tags, refer to the [Lumigo tokens](https://docs.lumigo.io/docs/tags) documentation.
+
 ---
 
 ##### `traceEcs`<sup>Optional</sup> <a name="traceEcs" id="@lumigo/cdk-constructs-v2.LumigoTraceProps.property.traceEcs"></a>
@@ -123,6 +154,9 @@ public readonly traceEcs: boolean;
 ```
 
 - *Type:* boolean
+- *Default:* true
+
+Whether to automatically trace all the Java, Node.js and Python Lambda functions deployed on ECS by this construct using the respective [Lumigo OpenTelemetry distributions](https://docs.lumigo.io/docs/containerized-applications).
 
 ---
 
@@ -133,6 +167,9 @@ public readonly traceLambda: boolean;
 ```
 
 - *Type:* boolean
+- *Default:* true
+
+Whether to automatically trace all the Node.js and Python Lambda functions in this construct using [Lumigo Lambda auto-instrumentation](https://docs.lumigo.io/docs/auto-instrumentation).
 
 ---
 
@@ -150,9 +187,9 @@ const traceEcsServiceDefinitionProps: TraceEcsServiceDefinitionProps = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.lumigoAutoTraceImage">lumigoAutoTraceImage</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | Whether the Lumigo CDK constructs should automatically add the `lumigo:auto-trace` AWS tag with the version of the construct in use. |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.lumigoAutoTraceImage">lumigoAutoTraceImage</a></code> | <code>string</code> | Which container image to use to instrument ECS workloads. |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | Which Lumigo tag to apply to your instrumented Lambda functions and ECS workloads. |
 
 ---
 
@@ -163,6 +200,9 @@ public readonly applyAutoTraceTag: boolean;
 ```
 
 - *Type:* boolean
+- *Default:* true
+
+Whether the Lumigo CDK constructs should automatically add the `lumigo:auto-trace` AWS tag with the version of the construct in use.
 
 ---
 
@@ -174,6 +214,14 @@ public readonly lumigoAutoTraceImage: string;
 
 - *Type:* string
 
+Which container image to use to instrument ECS workloads.
+
+Use a valid, full image name of the [`lumigo/lumigo-autotrace` image](https://gallery.ecr.aws/lumigo/lumigo-autotrace), e.g., `public.ecr.aws/lumigo/lumigo-autotrace:v14`.
+
+This property is exposed to support two use-cases: pinning a specific tag of the `lumigo/lumigo-autotrace` image, or supporting use-cases where Amazon ECS will not be able to pull from the Amazon ECS Public Gallery registry.
+The available tags are listed on the [`lumigo/lumigo-autotrace` Amazon ECR Public Gallery](https://gallery.ecr.aws/lumigo/lumigo-autotrace) page.
+The default value is the latest tag at the time of release of this version of the Lumigo CDK constructs: [default `lumigo/lumigo-autotrace` image](./src/lumigo_autotrace_image.json)
+
 ---
 
 ##### `lumigoTag`<sup>Optional</sup> <a name="lumigoTag" id="@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.lumigoTag"></a>
@@ -183,6 +231,11 @@ public readonly lumigoTag: string;
 ```
 
 - *Type:* string
+
+Which Lumigo tag to apply to your instrumented Lambda functions and ECS workloads.
+
+Lumigo Tags add dimension to your Lambda functions so that they can be identified, managed, organized, searched for, and filtered in Lumigo.
+For more information on Lumigo tags, refer to the [Lumigo tokens](https://docs.lumigo.io/docs/tags) documentation.
 
 ---
 
@@ -200,9 +253,9 @@ const traceEcsTaskDefinitionProps: TraceEcsTaskDefinitionProps = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsTaskDefinitionProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsTaskDefinitionProps.property.lumigoAutoTraceImage">lumigoAutoTraceImage</a></code> | <code>string</code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsTaskDefinitionProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsTaskDefinitionProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | Whether the Lumigo CDK constructs should automatically add the `lumigo:auto-trace` AWS tag with the version of the construct in use. |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsTaskDefinitionProps.property.lumigoAutoTraceImage">lumigoAutoTraceImage</a></code> | <code>string</code> | Which container image to use to instrument ECS workloads. |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsTaskDefinitionProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | Which Lumigo tag to apply to your instrumented Lambda functions and ECS workloads. |
 
 ---
 
@@ -213,6 +266,9 @@ public readonly applyAutoTraceTag: boolean;
 ```
 
 - *Type:* boolean
+- *Default:* true
+
+Whether the Lumigo CDK constructs should automatically add the `lumigo:auto-trace` AWS tag with the version of the construct in use.
 
 ---
 
@@ -224,6 +280,14 @@ public readonly lumigoAutoTraceImage: string;
 
 - *Type:* string
 
+Which container image to use to instrument ECS workloads.
+
+Use a valid, full image name of the [`lumigo/lumigo-autotrace` image](https://gallery.ecr.aws/lumigo/lumigo-autotrace), e.g., `public.ecr.aws/lumigo/lumigo-autotrace:v14`.
+
+This property is exposed to support two use-cases: pinning a specific tag of the `lumigo/lumigo-autotrace` image, or supporting use-cases where Amazon ECS will not be able to pull from the Amazon ECS Public Gallery registry.
+The available tags are listed on the [`lumigo/lumigo-autotrace` Amazon ECR Public Gallery](https://gallery.ecr.aws/lumigo/lumigo-autotrace) page.
+The default value is the latest tag at the time of release of this version of the Lumigo CDK constructs: [default `lumigo/lumigo-autotrace` image](./src/lumigo_autotrace_image.json)
+
 ---
 
 ##### `lumigoTag`<sup>Optional</sup> <a name="lumigoTag" id="@lumigo/cdk-constructs-v2.TraceEcsTaskDefinitionProps.property.lumigoTag"></a>
@@ -233,6 +297,11 @@ public readonly lumigoTag: string;
 ```
 
 - *Type:* string
+
+Which Lumigo tag to apply to your instrumented Lambda functions and ECS workloads.
+
+Lumigo Tags add dimension to your Lambda functions so that they can be identified, managed, organized, searched for, and filtered in Lumigo.
+For more information on Lumigo tags, refer to the [Lumigo tokens](https://docs.lumigo.io/docs/tags) documentation.
 
 ---
 
@@ -250,10 +319,10 @@ const traceLambdaProps: TraceLambdaProps = { ... }
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps.property.enableW3CTraceContext">enableW3CTraceContext</a></code> | <code>boolean</code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps.property.layerVersion">layerVersion</a></code> | <code>number</code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | Whether the Lumigo CDK constructs should automatically add the `lumigo:auto-trace` AWS tag with the version of the construct in use. |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps.property.enableW3CTraceContext">enableW3CTraceContext</a></code> | <code>boolean</code> | Whether the Lumigo Lambda tracers will add the `traceparent` and `tracestate` [W3C Trace Context](https://www.w3.org/TR/trace-context/) headers to outgoing HTTP/HTTPS requests. These headers are necessary to correctly correlate the HTTP requests from Lambda to workloads instrumented with the Lumigo OpenTelemetry distributions. The only real case in which this property should be set to false, is if there is some HTTP request issued by the Lambda function that is going towards an API with request signature that is affected negatively by the additional headers. If you encounter such an occurrence, please get in touch with [Lumigo's support](https://support.lumigo.io); we will issue an update to the Lumigo Lambda tracers to automatically not add [W3C Trace Context](https://www.w3.org/TR/trace-context/) to those APIs. |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps.property.layerVersion">layerVersion</a></code> | <code>number</code> | Which version of the appropriate Lumigo layer to be used; |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceLambdaProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | Which Lumigo tag to apply to your instrumented Lambda functions and ECS workloads. |
 
 ---
 
@@ -264,6 +333,9 @@ public readonly applyAutoTraceTag: boolean;
 ```
 
 - *Type:* boolean
+- *Default:* true
+
+Whether the Lumigo CDK constructs should automatically add the `lumigo:auto-trace` AWS tag with the version of the construct in use.
 
 ---
 
@@ -274,6 +346,9 @@ public readonly enableW3CTraceContext: boolean;
 ```
 
 - *Type:* boolean
+- *Default:* true
+
+Whether the Lumigo Lambda tracers will add the `traceparent` and `tracestate` [W3C Trace Context](https://www.w3.org/TR/trace-context/) headers to outgoing HTTP/HTTPS requests. These headers are necessary to correctly correlate the HTTP requests from Lambda to workloads instrumented with the Lumigo OpenTelemetry distributions. The only real case in which this property should be set to false, is if there is some HTTP request issued by the Lambda function that is going towards an API with request signature that is affected negatively by the additional headers. If you encounter such an occurrence, please get in touch with [Lumigo's support](https://support.lumigo.io); we will issue an update to the Lumigo Lambda tracers to automatically not add [W3C Trace Context](https://www.w3.org/TR/trace-context/) to those APIs.
 
 ---
 
@@ -285,6 +360,12 @@ public readonly layerVersion: number;
 
 - *Type:* number
 
+Which version of the appropriate Lumigo layer to be used;
+
+layer versions change based on runtime and region.
+Layer versions: [Node.js](https://github.com/lumigo-io/lumigo-node/tree/master/layers) and [Python](https://github.com/lumigo-io/python_tracer/tree/master/layers).
+The default value is the latest layers at the time of release of this version of the Lumigo CDK constructs: [default Node.js versions](./src/lambda_layers_nodejs.json), [default Python versions](./src/lambda_layers_python.json)
+
 ---
 
 ##### `lumigoTag`<sup>Optional</sup> <a name="lumigoTag" id="@lumigo/cdk-constructs-v2.TraceLambdaProps.property.lumigoTag"></a>
@@ -295,11 +376,20 @@ public readonly lumigoTag: string;
 
 - *Type:* string
 
+Which Lumigo tag to apply to your instrumented Lambda functions and ECS workloads.
+
+Lumigo Tags add dimension to your Lambda functions so that they can be identified, managed, organized, searched for, and filtered in Lumigo.
+For more information on Lumigo tags, refer to the [Lumigo tokens](https://docs.lumigo.io/docs/tags) documentation.
+
 ---
 
 ## Classes <a name="Classes" id="Classes"></a>
 
 ### Lumigo <a name="Lumigo" id="@lumigo/cdk-constructs-v2.Lumigo"></a>
+
+The `Lumigo` class is the entry point for instrumenting workloads deployed via CDK constructs with Lumigo.
+
+You usually would need only one instance of `Lumigo` per CDK application.
 
 #### Initializers <a name="Initializers" id="@lumigo/cdk-constructs-v2.Lumigo.Initializer"></a>
 
@@ -325,11 +415,11 @@ new Lumigo(props: LumigoProps)
 
 | **Name** | **Description** |
 | --- | --- |
-| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.asEcsExtension">asEcsExtension</a></code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceEcsService">traceEcsService</a></code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceEcsTaskDefinition">traceEcsTaskDefinition</a></code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.asEcsExtension">asEcsExtension</a></code> | This method returns a wrapper that can be used in conjunction with the {@link https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs.TaskDefinition.html#addwbrextensionextension\|TaskDefinition.addExtension} method. The effect is the same as using the {@link Lumigo#traceEcsTaskDefinition} method on the `TaskDefinition` on which you would invoke `TaskDefinition.addExtension`. |
+| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceEcsService">traceEcsService</a></code> | Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided ECS Service construct. |
+| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceEcsTaskDefinition">traceEcsTaskDefinition</a></code> | Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided `TaskDefinition`. If the ECS workload does not contain Java, Node.js or Python applications, no distributed-tracing data will be reported to Lumigo. |
 | <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceEverything">traceEverything</a></code> | *No description.* |
-| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceLambda">traceLambda</a></code> | *No description.* |
+| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceLambda">traceLambda</a></code> | Apply Lumigo autotracing for the provided Lambda function if it uses a supported Node.js or Python runtime. If the runtime used by the provided function is not supported by [Lumigo Lambda Auto-Tracing](https://docs.lumigo.io/docs/auto-instrumentation), a warning will be added to the CloudFormation template. |
 | <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.visit">visit</a></code> | *No description.* |
 
 ---
@@ -340,11 +430,15 @@ new Lumigo(props: LumigoProps)
 public asEcsExtension(): ITaskDefinitionExtension
 ```
 
+This method returns a wrapper that can be used in conjunction with the {@link https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs.TaskDefinition.html#addwbrextensionextension|TaskDefinition.addExtension} method. The effect is the same as using the {@link Lumigo#traceEcsTaskDefinition} method on the `TaskDefinition` on which you would invoke `TaskDefinition.addExtension`.
+
 ##### `traceEcsService` <a name="traceEcsService" id="@lumigo/cdk-constructs-v2.Lumigo.traceEcsService"></a>
 
 ```typescript
 public traceEcsService(service: Ec2Service | FargateService | QueueProcessingEc2Service | QueueProcessingFargateService | NetworkLoadBalancedEc2Service | NetworkLoadBalancedFargateService | ApplicationLoadBalancedEc2Service | ApplicationLoadBalancedFargateService | ScheduledEc2Task | ScheduledFargateTask | ApplicationMultipleTargetGroupsEc2Service | ApplicationMultipleTargetGroupsFargateService | NetworkMultipleTargetGroupsEc2Service | NetworkMultipleTargetGroupsFargateService, props?: TraceEcsServiceDefinitionProps): void
 ```
+
+Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided ECS Service construct.
 
 ###### `service`<sup>Required</sup> <a name="service" id="@lumigo/cdk-constructs-v2.Lumigo.traceEcsService.parameter.service"></a>
 
@@ -363,6 +457,8 @@ public traceEcsService(service: Ec2Service | FargateService | QueueProcessingEc2
 ```typescript
 public traceEcsTaskDefinition(taskDefinition: TaskDefinition, props?: TraceEcsTaskDefinitionProps): void
 ```
+
+Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided `TaskDefinition`. If the ECS workload does not contain Java, Node.js or Python applications, no distributed-tracing data will be reported to Lumigo.
 
 ###### `taskDefinition`<sup>Required</sup> <a name="taskDefinition" id="@lumigo/cdk-constructs-v2.Lumigo.traceEcsTaskDefinition.parameter.taskDefinition"></a>
 
@@ -399,6 +495,8 @@ public traceEverything(root: App | Stack, props?: LumigoTraceProps): void
 ```typescript
 public traceLambda(lambda: Function | NodejsFunction | PythonFunction, props?: TraceLambdaProps): void
 ```
+
+Apply Lumigo autotracing for the provided Lambda function if it uses a supported Node.js or Python runtime. If the runtime used by the provided function is not supported by [Lumigo Lambda Auto-Tracing](https://docs.lumigo.io/docs/auto-instrumentation), a warning will be added to the CloudFormation template.
 
 ###### `lambda`<sup>Required</sup> <a name="lambda" id="@lumigo/cdk-constructs-v2.Lumigo.traceLambda.parameter.lambda"></a>
 

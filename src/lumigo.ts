@@ -56,30 +56,106 @@ type SupportedEcsPatternsService = (
 type SupportedEcsService = FargateService | Ec2Service | SupportedEcsPatternsService;
 
 export interface LumigoProps {
+
+  /**
+   * A reference to a secret containing of the Lumigo token of the Lumigo project to be used with instrumented Lambda functions and ECS workloads.
+   * Instructions on how to retrieve your Lumigo token are available in the [Lumigo tokens](https://docs.lumigo.io/docs/tags) documentation.
+   * For more information concerning how AWS CDK 2 handles secrets, consult the [AWS SDK `SecretValue`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.SecretValue.html) documentation.
+   */
   readonly lumigoToken: SecretValue;
+
 }
 
 interface CommonTraceProps {
+
+  /**
+   * Which Lumigo tag to apply to your instrumented Lambda functions and ECS workloads.
+   * Lumigo Tags add dimension to your Lambda functions so that they can be identified, managed, organized, searched for, and filtered in Lumigo.
+   * For more information on Lumigo tags, refer to the [Lumigo tokens](https://docs.lumigo.io/docs/tags) documentation.
+   */
   readonly lumigoTag?: string;
+
+  /**
+   * Whether the Lumigo CDK constructs should automatically add the `lumigo:auto-trace` AWS tag with the version of the construct in use.
+   * @default true
+   */
   readonly applyAutoTraceTag?: boolean;
+
 }
 
-export interface LumigoTraceProps extends CommonTraceProps {
+export interface LumigoTraceProps extends CommonTraceProps, CommonTraceEcsProps {
+
+  /**
+   * Whether to automatically trace all the Node.js and Python Lambda functions in this construct using [Lumigo Lambda auto-instrumentation](https://docs.lumigo.io/docs/auto-instrumentation).
+   *
+   * @default true
+   */
   readonly traceLambda?: boolean;
+
+  /**
+   * Whether to automatically trace all the Java, Node.js and Python Lambda functions deployed on ECS by this construct using the respective [Lumigo OpenTelemetry distributions](https://docs.lumigo.io/docs/containerized-applications).
+   *
+   * @default true
+   */
   readonly traceEcs?: boolean;
+
+  /**
+   * Which version of the `lumigo-node-tracer` AWS Lambda layer to be used when instrumenting AWS Lambda functions using a supported Node.js runtime.
+   * Available layer versions depend on the AWS region your Lambda function is deployed in, see the [`lumigo-node-tracer` versions](https://github.com/lumigo-io/lumigo-node/tree/master/layers) list.
+   * The default value is the latest Node.js layer at the time of release of this version of the Lumigo CDK constructs: [default Node.js versions](./src/lambda_layers_nodejs.json).
+   */
   readonly lambdaNodejsLayerVersion?: number;
+
+  /**
+   * Which version of the `lumigo-python-tracer` AWS Lambda layer to be used when instrumenting AWS Lambda functions using a supported Python runtime.
+   * Available layer versions depend on the AWS region your Lambda function is deployed in, see the [`lumigo-python-tracer` versions](https://github.com/lumigo-io/python_tracer/tree/master/layers) list.
+   * The default value is the latest Python layer at the time of release of this version of the Lumigo CDK constructs: [default Python versions](./src/lambda_layers_python.json).
+   */
   readonly lambdaPythonLayerVersion?: number;
+
+  /**
+   * Whether the Lumigo Lambda tracers will add the [W3C Trace Context](https://www.w3.org/TR/trace-context/) `traceparent` and `tracestate` HTTP headers to outgoing HTTP/HTTPS requests.
+   * These headers are necessary to correctly correlate the HTTP requests from Lambda to workloads instrumented with the Lumigo OpenTelemetry distributions.
+   * The only real case in which this property should be set to false, is if there is some HTTP request issued by the Lambda function that is going towards an API with request signature that is affected negatively by the additional headers.
+   * If you encounter such an occurrence, please get in touch with [Lumigo's support](https://support.lumigo.io); we will issue an update to the Lumigo Lambda tracers to automatically not add [W3C Trace Context](https://www.w3.org/TR/trace-context/) to those APIs.
+   *
+   * @default true
+   */
   readonly lambdaEnableW3CTraceContext?: boolean;
-  readonly lumigoAutoTraceImage?: string;
+
 }
 
 export interface TraceLambdaProps extends CommonTraceProps {
+
+  /**
+   * Which version of the appropriate Lumigo layer to be used; layer versions change based on runtime and region.
+   * Layer versions: [Node.js](https://github.com/lumigo-io/lumigo-node/tree/master/layers) and [Python](https://github.com/lumigo-io/python_tracer/tree/master/layers).
+   * The default value is the latest layers at the time of release of this version of the Lumigo CDK constructs: [default Node.js versions](./src/lambda_layers_nodejs.json), [default Python versions](./src/lambda_layers_python.json)
+   */
   readonly layerVersion?: number;
+
+  /**
+   * Whether the Lumigo Lambda tracers will add the `traceparent` and `tracestate` [W3C Trace Context](https://www.w3.org/TR/trace-context/) headers to outgoing HTTP/HTTPS requests.
+   * These headers are necessary to correctly correlate the HTTP requests from Lambda to workloads instrumented with the Lumigo OpenTelemetry distributions.
+   * The only real case in which this property should be set to false, is if there is some HTTP request issued by the Lambda function that is going towards an API with request signature that is affected negatively by the additional headers.
+   * If you encounter such an occurrence, please get in touch with [Lumigo's support](https://support.lumigo.io); we will issue an update to the Lumigo Lambda tracers to automatically not add [W3C Trace Context](https://www.w3.org/TR/trace-context/) to those APIs.
+   *
+   * @default true
+   */
   readonly enableW3CTraceContext?: boolean;
 }
 
 interface CommonTraceEcsProps extends CommonTraceProps {
+
+  /**
+   * Which container image to use to instrument ECS workloads. Use a valid, full image name of the [`lumigo/lumigo-autotrace` image](https://gallery.ecr.aws/lumigo/lumigo-autotrace), e.g., `public.ecr.aws/lumigo/lumigo-autotrace:v14`.
+   *
+   * This property is exposed to support two use-cases: pinning a specific tag of the `lumigo/lumigo-autotrace` image, or supporting use-cases where Amazon ECS will not be able to pull from the Amazon ECS Public Gallery registry.
+   * The available tags are listed on the [`lumigo/lumigo-autotrace` Amazon ECR Public Gallery](https://gallery.ecr.aws/lumigo/lumigo-autotrace) page.
+   * The default value is the latest tag at the time of release of this version of the Lumigo CDK constructs: [default `lumigo/lumigo-autotrace` image](./src/lumigo_autotrace_image.json)
+   */
   readonly lumigoAutoTraceImage?: string;
+
 }
 
 export interface TraceEcsTaskDefinitionProps extends CommonTraceEcsProps {
@@ -133,6 +209,10 @@ const DEFAULT_TRACE_ECS_TASK_DEFINITION_PROPS: TraceEcsTaskDefinitionProps = {
   lumigoAutoTraceImage: DEFAULT_LUMIGO_INJECTOR_IMAGE_NAME,
 };
 
+/**
+ * The `Lumigo` class is the entry point for instrumenting workloads deployed via CDK constructs with Lumigo.
+ * You usually would need only one instance of `Lumigo` per CDK application.
+ */
 export class Lumigo {
 
   props: LumigoProps;
@@ -143,7 +223,10 @@ export class Lumigo {
     this.props = props;
   }
 
-  public visit(construct: IConstruct): void {
+  /**
+   * @private This is an internal API; it is not meant to be invoked directly by end-user code.
+   */
+  visit(construct: IConstruct): void {
     if (construct instanceof Function) {
       try {
         this.traceLambda(construct);
@@ -207,6 +290,10 @@ export class Lumigo {
         if (construct instanceof Function) {
           try {
             const layerType = lumigo.getLayerType(construct);
+            if (!layerType) {
+              lumigo.warning(construct, 'The runtime used by this function cannot be auto-traced by Lumigo.');
+              return;
+            }
 
             var layerVersion;
             if (layerType === LambdaLayerType.NODE) {
@@ -279,7 +366,10 @@ export class Lumigo {
   }
 
   /**
-   * @returns A wrapper that invokes `traceTaskDefinition` on the task definition to be extended.
+   * This method returns a wrapper that can be used in conjunction with the {@link https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs.TaskDefinition.html#addwbrextensionextension|TaskDefinition.addExtension} method.
+   * The effect is the same as using the {@link Lumigo#traceEcsTaskDefinition} method on the `TaskDefinition` on which you would invoke `TaskDefinition.addExtension`.
+   *
+   * @returns A wrapper that invokes {@link Lumigo#traceEcsTaskDefinition} on the task definition to be extended.
    */
   public asEcsExtension(): ITaskDefinitionExtension {
     return {
@@ -287,6 +377,9 @@ export class Lumigo {
     };
   }
 
+  /**
+   * Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided ECS Service construct.
+   */
   public traceEcsService(service: SupportedEcsService, props: TraceEcsServiceDefinitionProps = {
     applyAutoTraceTag: true,
   }) {
@@ -304,6 +397,10 @@ export class Lumigo {
     }
   }
 
+  /**
+   * Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided `TaskDefinition`.
+   * If the ECS workload does not contain Java, Node.js or Python applications, no distributed-tracing data will be reported to Lumigo.
+   */
   public traceEcsTaskDefinition(taskDefinition: TaskDefinition, props: TraceEcsTaskDefinitionProps = DEFAULT_TRACE_ECS_TASK_DEFINITION_PROPS) {
     this.doTraceEcsTaskDefinition(taskDefinition, props);
   }
@@ -445,12 +542,20 @@ export class Lumigo {
     }
   }
 
+  /**
+   * Apply Lumigo autotracing for the provided Lambda function if it uses a supported Node.js or Python runtime.
+   * If the runtime used by the provided function is not supported by [Lumigo Lambda Auto-Tracing](https://docs.lumigo.io/docs/auto-instrumentation),
+   * a warning will be added to the CloudFormation template.
+   */
   public traceLambda(lambda: SupportedLambdaFunction, props: TraceLambdaProps = {
     enableW3CTraceContext: false,
     applyAutoTraceTag: true,
   }) {
-    // TODO Add warning old layer
     const layerType = this.getLayerType(lambda);
+    if (!layerType) {
+      this.warning(lambda, 'The runtime used by this function cannot be auto-traced by Lumigo.');
+      return;
+    }
 
     const region = Stack.of(lambda).region;
 
@@ -509,7 +614,7 @@ export class Lumigo {
     Tags.of(construct).add(LUMIGO_TAG_TAG_NAME, value);
   }
 
-  private getLayerType(lambda: SupportedLambdaFunction): LambdaLayerType {
+  private getLayerType(lambda: SupportedLambdaFunction): LambdaLayerType | undefined {
     switch (lambda.runtime) {
       case Runtime.NODEJS_10_X:
       case Runtime.NODEJS_12_X:
@@ -539,10 +644,10 @@ export class Lumigo {
         switch (lambda.runtime.name) {
           case 'nodejs18.x': return LambdaLayerType.NODE;
           case 'python3.10': return LambdaLayerType.PYTHON;
-          default:
-            throw new UnsupportedLambdaRuntimeError(lambda.runtime);
         }
     }
+
+    return undefined;
   }
 
   private getLayerLatestArn(region: string, type: LambdaLayerType): string {

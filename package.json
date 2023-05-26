@@ -66,11 +66,6 @@
     "aws-cdk-lib": "^2.42.1",
     "constructs": "^10.0.5"
   },
-  "peerDependenciesMeta": {
-    "@aws-cdk/aws-lambda-python-alpha": {
-      "optional": true
-    }
-  },
   "keywords": [
     "awscdk",
     "cdk",
@@ -134,6 +129,11 @@
     "tsc": {
       "outDir": "lib",
       "rootDir": "src"
+    }
+  },
+  "peerDependenciesMeta": {
+    "@aws-cdk/aws-lambda-python-alpha": {
+      "optional": true
     }
   },
   "resolutions": {
