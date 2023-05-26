@@ -14,7 +14,7 @@ const app = new App();
 
 // Add here stacks and constructs
 
- // This will trace all Lambda functions and ECS workloads managed with supported constructs
+// This will trace all Lambda functions and ECS workloads managed with supported constructs
 new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')}).traceEverything(app);
 
 app.synth();
