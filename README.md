@@ -418,10 +418,6 @@ When encountering a [supported AWS Lambda-related construct](#supported-aws-lamb
 
 ### Instrumentation of Amazon ECS workloads
 
-**Note:** The automatic instrumentation of Amazon ECS workloads is currently **experimental**.
-
-#### Modifications applied to Amazon ECS task definitions
-
 When encountering a [supported Amazon ECS-related construct](#supported-amazon-ecs-constructs), the Lumigo CDK integration:
 
 1. Adds an [ephemeral volume](https://docs.aws.amazon.com/AmazonECS/latest/userguide/using_data_volumes.html) called `lumigo-injector` to the task definition
@@ -431,8 +427,6 @@ When encountering a [supported Amazon ECS-related construct](#supported-amazon-e
   1. A [container dependency](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ContainerDependency.html) on the completion of the `lumigo-injector` container.
   1. The `LUMIGO_TRACER_TOKEN` environment variable with, as value, the plain-text value of the [`SecretValue`](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.SecretValue.html#static-unsafewbrplainwbrtextsecret) passed on instantiation of the `Lumigo` object.
   1. The `LD_PRELOAD` environment variable pointing to the Lumigo Injector's `lumigo_injector.so` file, which performs as needed the activation of the Python or Node.js tracers delivered by the Lumigo OpenTelemetry Distros for Node.js and Python as needed.
-
-#### How tracing works for Amazon ECS task definitions
 
 The automatic instrumentation of Amazon ECS task definitions works based on the principle that the runtimes (CPython, Node.js, etc.) inside your Amazon ECS tasks can be traced with OpenTelemetry Distros like Lumigo's that have no-code activation capabilities (see [Node.js](https://github.com/lumigo-io/opentelemetry-js-distro#no-code-activation), [Python](https://github.com/lumigo-io/opentelemetry-python-distro#no-code-activation)) if:
 
