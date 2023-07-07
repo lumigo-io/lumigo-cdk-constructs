@@ -16,7 +16,6 @@ const project = new awscdk.AwsCdkConstructLibrary({
     `aws-cdk-lib@^${baselineCdkVersion} < 3`,
     `@aws-cdk/aws-lambda-python-alpha@>= ${baselineCdkVersion}-${pythonAlphaVersionSuffix} < 3`,
   ],
-  /* Build dependencies for this module. */
   devDeps: [
     '@jest/globals',
     `aws-cdk-lib@${baselineCdkVersion}`,
@@ -33,6 +32,18 @@ const project = new awscdk.AwsCdkConstructLibrary({
   ],
   majorVersion: 0,
   projenTokenSecret: 'GITHUB_TOKEN',
+  dependabot: true,
+  dependabotOptions: {
+    // We want precisey these versions as baseline we support
+    ignore: [
+      {
+        dependencyName: 'aws-cdk-lib',
+      },
+      {
+        dependencyName: '@aws-cdk/aws-lambda-python-alpha',
+      },
+    ],
+  },
 });
 project.package.addField('peerDependenciesMeta', {
   '@aws-cdk/aws-lambda-python-alpha': {
