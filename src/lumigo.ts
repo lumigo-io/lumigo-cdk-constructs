@@ -287,7 +287,7 @@ export class Lumigo {
           }
         }
 
-        if (construct instanceof Function) {
+        if (construct instanceof Function && props.traceLambda !== false) {
           try {
             const layerType = lumigo.getLayerType(construct);
             if (!layerType) {
@@ -321,7 +321,7 @@ export class Lumigo {
               throw e;
             }
           }
-        } else if (!!props.traceEcs) {
+        } else if (props.traceEcs !== false) {
           if (
             construct instanceof Ec2Service ||
             construct instanceof FargateService ||

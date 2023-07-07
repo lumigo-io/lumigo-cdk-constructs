@@ -8,6 +8,62 @@ describe('Lambda tracing injection', () => {
 
   describe('with Lumigo as aspect to the entire application', () => {
 
+    describe('opting Lambdas out', () => {
+
+      test('does not instrument a Node.js function', () => {
+        const app = new App();
+
+        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+          traceLambda: false,
+        });
+
+        const root = new NodejsTestStack(app, 'NodejsTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+        });
+
+        app.synth();
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f).not.toHaveLumigoLayerInRegion({
+          region: 'eu-central-1', name: 'lumigo-node-tracer',
+        });
+        expect(f).not.toHaveEnvVarWithValue('AWS_LAMBDA_EXEC_WRAPPER', '/opt/lumigo_wrapper');
+        expect(f).not.toHaveEnvVarWithValue('LUMIGO_PROPAGATE_W3C', 'true');
+        expect(f).not.toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
+      });
+
+      test('does not instrument a Python function', () => {
+        const app = new App();
+
+        new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') }).traceEverything(app, {
+          traceLambda: false,
+        });
+
+        const root = new PythonTestStack(app, 'PythonTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+        });
+
+        app.synth();
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f).not.toHaveLumigoLayerInRegion({
+          region: 'eu-central-1', name: 'lumigo-python-tracer',
+        });
+        expect(f).not.toHaveEnvVarWithValue('LUMIGO_PROPAGATE_W3C', 'false');
+        expect(f).not.toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
+        expect(f).not.toHaveEnvVarWithValue('LUMIGO_ORIGINAL_HANDLER', 'index.handler');
+      });
+
+    });
+
     describe('in an unsupported region with', () => {
 
       test('a Node.js function', () => {
