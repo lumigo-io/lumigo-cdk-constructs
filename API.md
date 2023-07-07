@@ -173,27 +173,27 @@ Whether to automatically trace all the Node.js and Python Lambda functions in th
 
 ---
 
-### TraceEcsServiceDefinitionProps <a name="TraceEcsServiceDefinitionProps" id="@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps"></a>
+### TraceEcsScheduledTaskProps <a name="TraceEcsScheduledTaskProps" id="@lumigo/cdk-constructs-v2.TraceEcsScheduledTaskProps"></a>
 
-#### Initializer <a name="Initializer" id="@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.Initializer"></a>
+#### Initializer <a name="Initializer" id="@lumigo/cdk-constructs-v2.TraceEcsScheduledTaskProps.Initializer"></a>
 
 ```typescript
-import { TraceEcsServiceDefinitionProps } from '@lumigo/cdk-constructs-v2'
+import { TraceEcsScheduledTaskProps } from '@lumigo/cdk-constructs-v2'
 
-const traceEcsServiceDefinitionProps: TraceEcsServiceDefinitionProps = { ... }
+const traceEcsScheduledTaskProps: TraceEcsScheduledTaskProps = { ... }
 ```
 
 #### Properties <a name="Properties" id="Properties"></a>
 
 | **Name** | **Type** | **Description** |
 | --- | --- | --- |
-| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | Whether the Lumigo CDK constructs should automatically add the `lumigo:auto-trace` AWS tag with the version of the construct in use. |
-| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.lumigoAutoTraceImage">lumigoAutoTraceImage</a></code> | <code>string</code> | Which container image to use to instrument ECS workloads. |
-| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | Which Lumigo tag to apply to your instrumented Lambda functions and ECS workloads. |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsScheduledTaskProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | Whether the Lumigo CDK constructs should automatically add the `lumigo:auto-trace` AWS tag with the version of the construct in use. |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsScheduledTaskProps.property.lumigoAutoTraceImage">lumigoAutoTraceImage</a></code> | <code>string</code> | Which container image to use to instrument ECS workloads. |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsScheduledTaskProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | Which Lumigo tag to apply to your instrumented Lambda functions and ECS workloads. |
 
 ---
 
-##### `applyAutoTraceTag`<sup>Optional</sup> <a name="applyAutoTraceTag" id="@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.applyAutoTraceTag"></a>
+##### `applyAutoTraceTag`<sup>Optional</sup> <a name="applyAutoTraceTag" id="@lumigo/cdk-constructs-v2.TraceEcsScheduledTaskProps.property.applyAutoTraceTag"></a>
 
 ```typescript
 public readonly applyAutoTraceTag: boolean;
@@ -206,7 +206,7 @@ Whether the Lumigo CDK constructs should automatically add the `lumigo:auto-trac
 
 ---
 
-##### `lumigoAutoTraceImage`<sup>Optional</sup> <a name="lumigoAutoTraceImage" id="@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.lumigoAutoTraceImage"></a>
+##### `lumigoAutoTraceImage`<sup>Optional</sup> <a name="lumigoAutoTraceImage" id="@lumigo/cdk-constructs-v2.TraceEcsScheduledTaskProps.property.lumigoAutoTraceImage"></a>
 
 ```typescript
 public readonly lumigoAutoTraceImage: string;
@@ -224,7 +224,73 @@ The default value is the latest tag at the time of release of this version of th
 
 ---
 
-##### `lumigoTag`<sup>Optional</sup> <a name="lumigoTag" id="@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps.property.lumigoTag"></a>
+##### `lumigoTag`<sup>Optional</sup> <a name="lumigoTag" id="@lumigo/cdk-constructs-v2.TraceEcsScheduledTaskProps.property.lumigoTag"></a>
+
+```typescript
+public readonly lumigoTag: string;
+```
+
+- *Type:* string
+
+Which Lumigo tag to apply to your instrumented Lambda functions and ECS workloads.
+
+Lumigo Tags add dimension to your Lambda functions so that they can be identified, managed, organized, searched for, and filtered in Lumigo.
+For more information on Lumigo tags, refer to the [Lumigo tokens](https://docs.lumigo.io/docs/tags) documentation.
+
+---
+
+### TraceEcsServiceProps <a name="TraceEcsServiceProps" id="@lumigo/cdk-constructs-v2.TraceEcsServiceProps"></a>
+
+#### Initializer <a name="Initializer" id="@lumigo/cdk-constructs-v2.TraceEcsServiceProps.Initializer"></a>
+
+```typescript
+import { TraceEcsServiceProps } from '@lumigo/cdk-constructs-v2'
+
+const traceEcsServiceProps: TraceEcsServiceProps = { ... }
+```
+
+#### Properties <a name="Properties" id="Properties"></a>
+
+| **Name** | **Type** | **Description** |
+| --- | --- | --- |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceProps.property.applyAutoTraceTag">applyAutoTraceTag</a></code> | <code>boolean</code> | Whether the Lumigo CDK constructs should automatically add the `lumigo:auto-trace` AWS tag with the version of the construct in use. |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceProps.property.lumigoAutoTraceImage">lumigoAutoTraceImage</a></code> | <code>string</code> | Which container image to use to instrument ECS workloads. |
+| <code><a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceProps.property.lumigoTag">lumigoTag</a></code> | <code>string</code> | Which Lumigo tag to apply to your instrumented Lambda functions and ECS workloads. |
+
+---
+
+##### `applyAutoTraceTag`<sup>Optional</sup> <a name="applyAutoTraceTag" id="@lumigo/cdk-constructs-v2.TraceEcsServiceProps.property.applyAutoTraceTag"></a>
+
+```typescript
+public readonly applyAutoTraceTag: boolean;
+```
+
+- *Type:* boolean
+- *Default:* true
+
+Whether the Lumigo CDK constructs should automatically add the `lumigo:auto-trace` AWS tag with the version of the construct in use.
+
+---
+
+##### `lumigoAutoTraceImage`<sup>Optional</sup> <a name="lumigoAutoTraceImage" id="@lumigo/cdk-constructs-v2.TraceEcsServiceProps.property.lumigoAutoTraceImage"></a>
+
+```typescript
+public readonly lumigoAutoTraceImage: string;
+```
+
+- *Type:* string
+
+Which container image to use to instrument ECS workloads.
+
+Use a valid, full image name of the [`lumigo/lumigo-autotrace` image](https://gallery.ecr.aws/lumigo/lumigo-autotrace), e.g., `public.ecr.aws/lumigo/lumigo-autotrace:v14`.
+
+This property is exposed to support two use-cases: pinning a specific tag of the `lumigo/lumigo-autotrace` image, or supporting use-cases where Amazon ECS will not be able to pull from the Amazon ECS Public Gallery registry.
+The available tags are listed on the [`lumigo/lumigo-autotrace` Amazon ECR Public Gallery](https://gallery.ecr.aws/lumigo/lumigo-autotrace) page.
+The default value is the latest tag at the time of release of this version of the Lumigo CDK constructs: [default `lumigo/lumigo-autotrace` image](./src/lumigo_autotrace_image.json)
+
+---
+
+##### `lumigoTag`<sup>Optional</sup> <a name="lumigoTag" id="@lumigo/cdk-constructs-v2.TraceEcsServiceProps.property.lumigoTag"></a>
 
 ```typescript
 public readonly lumigoTag: string;
@@ -416,6 +482,7 @@ new Lumigo(props: LumigoProps)
 | **Name** | **Description** |
 | --- | --- |
 | <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.asEcsExtension">asEcsExtension</a></code> | This method returns a wrapper that can be used in conjunction with the {@link https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs.TaskDefinition.html#addwbrextensionextension\|TaskDefinition.addExtension} method. The effect is the same as using the {@link Lumigo#traceEcsTaskDefinition} method on the `TaskDefinition` on which you would invoke `TaskDefinition.addExtension`. |
+| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceEcsScheduledTask">traceEcsScheduledTask</a></code> | Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided ECS ScheduledTask construct. |
 | <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceEcsService">traceEcsService</a></code> | Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided ECS Service construct. |
 | <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceEcsTaskDefinition">traceEcsTaskDefinition</a></code> | Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided `TaskDefinition`. If the ECS workload does not contain Java, Node.js or Python applications, no distributed-tracing data will be reported to Lumigo. |
 | <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceEverything">traceEverything</a></code> | *No description.* |
@@ -432,37 +499,57 @@ public asEcsExtension(): ITaskDefinitionExtension
 
 This method returns a wrapper that can be used in conjunction with the {@link https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs.TaskDefinition.html#addwbrextensionextension|TaskDefinition.addExtension} method. The effect is the same as using the {@link Lumigo#traceEcsTaskDefinition} method on the `TaskDefinition` on which you would invoke `TaskDefinition.addExtension`.
 
+##### `traceEcsScheduledTask` <a name="traceEcsScheduledTask" id="@lumigo/cdk-constructs-v2.Lumigo.traceEcsScheduledTask"></a>
+
+```typescript
+public traceEcsScheduledTask(scheduledTask: ScheduledEc2Task | ScheduledFargateTask, props?: TraceEcsScheduledTaskProps): void
+```
+
+Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided ECS ScheduledTask construct.
+
+###### `scheduledTask`<sup>Required</sup> <a name="scheduledTask" id="@lumigo/cdk-constructs-v2.Lumigo.traceEcsScheduledTask.parameter.scheduledTask"></a>
+
+- *Type:* aws-cdk-lib.aws_ecs_patterns.ScheduledEc2Task | aws-cdk-lib.aws_ecs_patterns.ScheduledFargateTask
+
+---
+
+###### `props`<sup>Optional</sup> <a name="props" id="@lumigo/cdk-constructs-v2.Lumigo.traceEcsScheduledTask.parameter.props"></a>
+
+- *Type:* <a href="#@lumigo/cdk-constructs-v2.TraceEcsScheduledTaskProps">TraceEcsScheduledTaskProps</a>
+
+---
+
 ##### `traceEcsService` <a name="traceEcsService" id="@lumigo/cdk-constructs-v2.Lumigo.traceEcsService"></a>
 
 ```typescript
-public traceEcsService(service: Ec2Service | FargateService | QueueProcessingEc2Service | QueueProcessingFargateService | NetworkLoadBalancedEc2Service | NetworkLoadBalancedFargateService | ApplicationLoadBalancedEc2Service | ApplicationLoadBalancedFargateService | ScheduledEc2Task | ScheduledFargateTask | ApplicationMultipleTargetGroupsEc2Service | ApplicationMultipleTargetGroupsFargateService | NetworkMultipleTargetGroupsEc2Service | NetworkMultipleTargetGroupsFargateService, props?: TraceEcsServiceDefinitionProps): void
+public traceEcsService(service: Ec2Service | FargateService | QueueProcessingEc2Service | QueueProcessingFargateService | NetworkLoadBalancedEc2Service | NetworkLoadBalancedFargateService | ApplicationLoadBalancedEc2Service | ApplicationLoadBalancedFargateService | ApplicationMultipleTargetGroupsEc2Service | ApplicationMultipleTargetGroupsFargateService | NetworkMultipleTargetGroupsEc2Service | NetworkMultipleTargetGroupsFargateService, props?: TraceEcsServiceProps): void
 ```
 
 Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided ECS Service construct.
 
 ###### `service`<sup>Required</sup> <a name="service" id="@lumigo/cdk-constructs-v2.Lumigo.traceEcsService.parameter.service"></a>
 
-- *Type:* aws-cdk-lib.aws_ecs.Ec2Service | aws-cdk-lib.aws_ecs.FargateService | aws-cdk-lib.aws_ecs_patterns.QueueProcessingEc2Service | aws-cdk-lib.aws_ecs_patterns.QueueProcessingFargateService | aws-cdk-lib.aws_ecs_patterns.NetworkLoadBalancedEc2Service | aws-cdk-lib.aws_ecs_patterns.NetworkLoadBalancedFargateService | aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedEc2Service | aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedFargateService | aws-cdk-lib.aws_ecs_patterns.ScheduledEc2Task | aws-cdk-lib.aws_ecs_patterns.ScheduledFargateTask | aws-cdk-lib.aws_ecs_patterns.ApplicationMultipleTargetGroupsEc2Service | aws-cdk-lib.aws_ecs_patterns.ApplicationMultipleTargetGroupsFargateService | aws-cdk-lib.aws_ecs_patterns.NetworkMultipleTargetGroupsEc2Service | aws-cdk-lib.aws_ecs_patterns.NetworkMultipleTargetGroupsFargateService
+- *Type:* aws-cdk-lib.aws_ecs.Ec2Service | aws-cdk-lib.aws_ecs.FargateService | aws-cdk-lib.aws_ecs_patterns.QueueProcessingEc2Service | aws-cdk-lib.aws_ecs_patterns.QueueProcessingFargateService | aws-cdk-lib.aws_ecs_patterns.NetworkLoadBalancedEc2Service | aws-cdk-lib.aws_ecs_patterns.NetworkLoadBalancedFargateService | aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedEc2Service | aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedFargateService | aws-cdk-lib.aws_ecs_patterns.ApplicationMultipleTargetGroupsEc2Service | aws-cdk-lib.aws_ecs_patterns.ApplicationMultipleTargetGroupsFargateService | aws-cdk-lib.aws_ecs_patterns.NetworkMultipleTargetGroupsEc2Service | aws-cdk-lib.aws_ecs_patterns.NetworkMultipleTargetGroupsFargateService
 
 ---
 
 ###### `props`<sup>Optional</sup> <a name="props" id="@lumigo/cdk-constructs-v2.Lumigo.traceEcsService.parameter.props"></a>
 
-- *Type:* <a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceDefinitionProps">TraceEcsServiceDefinitionProps</a>
+- *Type:* <a href="#@lumigo/cdk-constructs-v2.TraceEcsServiceProps">TraceEcsServiceProps</a>
 
 ---
 
 ##### `traceEcsTaskDefinition` <a name="traceEcsTaskDefinition" id="@lumigo/cdk-constructs-v2.Lumigo.traceEcsTaskDefinition"></a>
 
 ```typescript
-public traceEcsTaskDefinition(taskDefinition: TaskDefinition, props?: TraceEcsTaskDefinitionProps): void
+public traceEcsTaskDefinition(taskDefinition: Ec2TaskDefinition | FargateTaskDefinition, props?: TraceEcsTaskDefinitionProps): void
 ```
 
 Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided `TaskDefinition`. If the ECS workload does not contain Java, Node.js or Python applications, no distributed-tracing data will be reported to Lumigo.
 
 ###### `taskDefinition`<sup>Required</sup> <a name="taskDefinition" id="@lumigo/cdk-constructs-v2.Lumigo.traceEcsTaskDefinition.parameter.taskDefinition"></a>
 
-- *Type:* aws-cdk-lib.aws_ecs.TaskDefinition
+- *Type:* aws-cdk-lib.aws_ecs.Ec2TaskDefinition | aws-cdk-lib.aws_ecs.FargateTaskDefinition
 
 ---
 

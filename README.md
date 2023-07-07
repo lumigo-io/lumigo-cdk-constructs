@@ -220,6 +220,46 @@ const stack = new NodejsStack(app, 'NodejsTestStack', {
 app.synth();
 ```
 
+### Instrumenting single ECS scheduled task
+
+```typescript
+import { Lumigo } from '@lumigo/cdk-constructs-v2';
+import { App, SecretValue, Stack, StackProps } from 'aws-cdk-lib';
+import { ScheduledFargateTask } from 'aws-cdk-lib/aws-ecs-patterns';
+import { Construct } from 'constructs';
+
+interface NodejsStackProps extends StackProps {
+  readonly lumigo: Lumigo;
+}
+
+export class NodejsStack extends Stack {
+
+    constructor(scope: Construct, id: string, props: NodejsStackProps = {}) {
+        super(scope, id, props);
+
+        const scheduledTask = new ScheduledFargateTask(this, 'MyFargateScheduledTask', {
+            ...
+        });
+
+        props.lumigo.traceEcsScheduledTask(scheduledTask);
+    }
+
+}
+
+const app = new App();
+
+const lumigo = new Lumigo({lumigoToken:SecretValue.secretsManager('LumigoToken')});
+
+const stack = new NodejsStack(app, 'NodejsTestStack', {
+    env: {
+        region: 'eu-central-1',
+    },
+    lumigo,
+}); 
+
+app.synth();
+```
+
 ### Instrumenting single ECS task definitions
 
 Instrumenting at the level of the Amazon ECS task definition enables you to share the instrumented task definition across multiple ECS services: 

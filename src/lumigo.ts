@@ -7,7 +7,20 @@ import { dirname, join } from 'path';
 import type { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
 
 import { App, Annotations, IAspect, SecretValue, Stack, Aspects, Tags, TagManager, CfnDynamicReference, CfnDynamicReferenceService } from 'aws-cdk-lib';
-import { CfnTaskDefinition, ContainerDefinition, ContainerDependencyCondition, ContainerImage, Ec2Service, FargateService, ITaskDefinitionExtension, Secret, TaskDefinition, Volume } from 'aws-cdk-lib/aws-ecs';
+import {
+  CfnTaskDefinition,
+  ContainerDefinition,
+  ContainerDependencyCondition,
+  ContainerImage,
+  Ec2Service,
+  Ec2TaskDefinition,
+  FargateService,
+  FargateTaskDefinition,
+  ITaskDefinitionExtension,
+  Secret,
+  TaskDefinition,
+  Volume,
+} from 'aws-cdk-lib/aws-ecs';
 import {
   ApplicationLoadBalancedEc2Service,
   ApplicationLoadBalancedFargateService,
@@ -38,7 +51,22 @@ import { image as lumigo_autotrace_image } from './lumigo_autotrace_image.json';
 
 export const DEFAULT_LUMIGO_INJECTOR_IMAGE_NAME = lumigo_autotrace_image;
 
-type SupportedLambdaFunction = Function | NodejsFunction | PythonFunction;
+type SupportedLambdaFunction = (
+  Function |
+  NodejsFunction |
+  PythonFunction
+);
+
+type SupportedEcsTaskDefinition = (
+  Ec2TaskDefinition |
+  FargateTaskDefinition
+);
+
+type SupportedEcsScheduledTask = (
+  ScheduledEc2Task |
+  ScheduledFargateTask
+);
+
 type SupportedEcsPatternsService = (
   ApplicationLoadBalancedEc2Service |
   ApplicationLoadBalancedFargateService |
@@ -49,11 +77,14 @@ type SupportedEcsPatternsService = (
   NetworkMultipleTargetGroupsEc2Service |
   NetworkMultipleTargetGroupsFargateService |
   QueueProcessingEc2Service |
-  QueueProcessingFargateService |
-  ScheduledEc2Task |
-  ScheduledFargateTask
+  QueueProcessingFargateService
 );
-type SupportedEcsService = FargateService | Ec2Service | SupportedEcsPatternsService;
+
+type SupportedEcsService = (
+  FargateService |
+  Ec2Service |
+  SupportedEcsPatternsService
+);
 
 export interface LumigoProps {
 
@@ -161,7 +192,10 @@ interface CommonTraceEcsProps extends CommonTraceProps {
 export interface TraceEcsTaskDefinitionProps extends CommonTraceEcsProps {
 }
 
-export interface TraceEcsServiceDefinitionProps extends CommonTraceEcsProps {
+export interface TraceEcsScheduledTaskProps extends CommonTraceEcsProps {
+}
+
+export interface TraceEcsServiceProps extends CommonTraceEcsProps {
 }
 
 // Layer type to layer name
@@ -253,6 +287,9 @@ export class Lumigo {
   }
 
   public traceEverything(root: App | Stack, props: LumigoTraceProps = DEFAULT_LUMIGO_TRACE_PROPS) {
+    // For the people not using TypeScript, we need to perform some basic type validation
+    assertExpectedConstructType('traceEverything', 'App', root, (c) => c instanceof App);
+
     Aspects.of(root).add(this.asAspect(props));
   }
 
@@ -322,22 +359,7 @@ export class Lumigo {
             }
           }
         } else if (props.traceEcs !== false) {
-          if (
-            construct instanceof Ec2Service ||
-            construct instanceof FargateService ||
-            construct instanceof ApplicationLoadBalancedEc2Service ||
-            construct instanceof ApplicationLoadBalancedFargateService ||
-            construct instanceof ApplicationMultipleTargetGroupsEc2Service ||
-            construct instanceof ApplicationMultipleTargetGroupsFargateService ||
-            construct instanceof NetworkLoadBalancedEc2Service ||
-            construct instanceof NetworkLoadBalancedFargateService ||
-            construct instanceof NetworkMultipleTargetGroupsEc2Service ||
-            construct instanceof NetworkMultipleTargetGroupsFargateService ||
-            construct instanceof QueueProcessingEc2Service ||
-            construct instanceof QueueProcessingFargateService ||
-            construct instanceof ScheduledEc2Task ||
-            construct instanceof ScheduledFargateTask
-          ) {
+          if (isSupportedEcsServiceConstruct(construct)) {
             lumigo.traceEcsService(construct, {
               applyAutoTraceTag,
               lumigoAutoTraceImage: props.lumigoAutoTraceImage,
@@ -348,7 +370,18 @@ export class Lumigo {
             if (props.applyAutoTraceTag) {
               applyAwsTagThroughTagManager(LUMIGO_AUTOTRACE_TAG_NAME, LUMIGO_AUTOTRACE_TAG_VALUE);
             }
-          } else if (construct instanceof TaskDefinition) {
+          } else if (isSupportedEcsScheduledTaskConstruct(construct)) {
+            lumigo.traceEcsScheduledTask(construct, {
+              applyAutoTraceTag,
+              lumigoAutoTraceImage: props.lumigoAutoTraceImage,
+            });
+            if (props.lumigoTag) {
+              applyAwsTagThroughTagManager(LUMIGO_TAG_TAG_NAME, props.lumigoTag!);
+            }
+            if (props.applyAutoTraceTag) {
+              applyAwsTagThroughTagManager(LUMIGO_AUTOTRACE_TAG_NAME, LUMIGO_AUTOTRACE_TAG_VALUE);
+            }
+          } else if (isSupportedEcsTaskDefinitionConstruct(construct)) {
             lumigo.traceEcsTaskDefinition(construct, {
               applyAutoTraceTag,
               lumigoAutoTraceImage: props.lumigoAutoTraceImage,
@@ -378,11 +411,37 @@ export class Lumigo {
   }
 
   /**
-   * Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided ECS Service construct.
+   * Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided ECS ScheduledTask construct.
    */
-  public traceEcsService(service: SupportedEcsService, props: TraceEcsServiceDefinitionProps = {
+  public traceEcsScheduledTask(scheduledTask: SupportedEcsScheduledTask, props: TraceEcsScheduledTaskProps = {
     applyAutoTraceTag: true,
   }) {
+    // For the people not using TypeScript, we need to perform some basic type validation
+    assertExpectedConstructType('traceEcsScheduledTask', 'ScheduledEc2Task or ScheduledFargateTask', scheduledTask, (c) => isSupportedEcsScheduledTaskConstruct(c));
+
+    this.doTraceEcsTaskDefinition(scheduledTask.taskDefinition, {
+      applyAutoTraceTag: false,
+      lumigoAutoTraceImage: props.lumigoAutoTraceImage,
+    });
+
+    if (!!props.applyAutoTraceTag) {
+      this.applyAutotraceTag(scheduledTask);
+    }
+
+    if (!!props.lumigoTag) {
+      this.applyLumigoTag(scheduledTask, props.lumigoTag!);
+    }
+  }
+
+  /**
+   * Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided ECS Service construct.
+   */
+  public traceEcsService(service: SupportedEcsService, props: TraceEcsServiceProps = {
+    applyAutoTraceTag: true,
+  }) {
+    // For the people not using TypeScript, we need to perform some basic type validation
+    assertExpectedConstructType('traceEcsService', 'EcsService', service, (c) => isSupportedEcsServiceConstruct(c));
+
     this.doTraceEcsTaskDefinition(service.taskDefinition, {
       applyAutoTraceTag: false,
       lumigoAutoTraceImage: props.lumigoAutoTraceImage,
@@ -401,7 +460,13 @@ export class Lumigo {
    * Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided `TaskDefinition`.
    * If the ECS workload does not contain Java, Node.js or Python applications, no distributed-tracing data will be reported to Lumigo.
    */
-  public traceEcsTaskDefinition(taskDefinition: TaskDefinition, props: TraceEcsTaskDefinitionProps = DEFAULT_TRACE_ECS_TASK_DEFINITION_PROPS) {
+  public traceEcsTaskDefinition(
+    taskDefinition: SupportedEcsTaskDefinition,
+    props: TraceEcsTaskDefinitionProps = DEFAULT_TRACE_ECS_TASK_DEFINITION_PROPS,
+  ) {
+    // For the people not using TypeScript, we need to perform some basic type validation
+    assertExpectedConstructType('traceEcsTaskDefinition', 'TaskDefinition', taskDefinition, (c) => isSupportedEcsTaskDefinitionConstruct(c));
+
     this.doTraceEcsTaskDefinition(taskDefinition, props);
   }
 
@@ -551,6 +616,9 @@ export class Lumigo {
     enableW3CTraceContext: false,
     applyAutoTraceTag: true,
   }) {
+    // For the people not using TypeScript, we need to perform some basic type validation
+    assertExpectedConstructType('traceLambda', 'Function', lambda, (c) => c instanceof Function);
+
     const layerType = this.getLayerType(lambda);
     if (!layerType) {
       this.warning(lambda, 'The runtime used by this function cannot be auto-traced by Lumigo.');
@@ -661,6 +729,62 @@ export class Lumigo {
     return latestLayerArn;
   }
 
+}
+
+interface TypeTestFn {
+  (arg: Construct): boolean;
+}
+
+const isSupportedEcsTaskDefinitionConstruct = (construct: Construct): construct is SupportedEcsTaskDefinition => {
+  return construct instanceof FargateTaskDefinition || construct instanceof Ec2TaskDefinition;
+};
+
+const isSupportedEcsScheduledTaskConstruct = (construct: Construct): construct is SupportedEcsScheduledTask => {
+  return construct instanceof ScheduledEc2Task || construct instanceof ScheduledFargateTask;
+};
+
+const isSupportedEcsServiceConstruct = (construct: Construct): construct is SupportedEcsPatternsService => {
+  return construct instanceof Ec2Service ||
+    construct instanceof FargateService ||
+    construct instanceof ApplicationLoadBalancedEc2Service ||
+    construct instanceof ApplicationLoadBalancedFargateService ||
+    construct instanceof ApplicationMultipleTargetGroupsEc2Service ||
+    construct instanceof ApplicationMultipleTargetGroupsFargateService ||
+    construct instanceof NetworkLoadBalancedEc2Service ||
+    construct instanceof NetworkLoadBalancedFargateService ||
+    construct instanceof NetworkMultipleTargetGroupsEc2Service ||
+    construct instanceof NetworkMultipleTargetGroupsFargateService ||
+    construct instanceof QueueProcessingEc2Service ||
+    construct instanceof QueueProcessingFargateService;
+};
+
+function assertExpectedConstructType(invokedMethod: string, expectedType: string, construct: Construct, test: TypeTestFn) {
+  if (!test(construct)) {
+    let message = `Lumigo.${invokedMethod} needs a ${expectedType} as input`;
+
+    const additionalHint = getTypeErrorHint(construct);
+    if (additionalHint) {
+      message = `${message}; ${additionalHint}`;
+    }
+
+    throw new Error(message);
+  }
+}
+
+function getTypeErrorHint(construct: Construct): (string | undefined) {
+  if (construct instanceof App) {
+    return 'are you maybe looking for Lumigo.traceEverything instead?';
+  } else if (construct instanceof Function) {
+    return 'are you maybe looking for Lumigo.traceLambda instead?';
+  } else if (construct instanceof TaskDefinition) {
+    return 'are you maybe looking for Lumigo.traceEcsTaskDefinition instead?';
+  } else if (isSupportedEcsScheduledTaskConstruct(construct)) {
+    return 'are you maybe looking for Lumigo.traceEcsScheduledTask instead?';
+  } else if (isSupportedEcsServiceConstruct(construct)) {
+    return 'are you maybe looking for Lumigo.traceEcsService instead?';
+  }
+
+  return undefined;
 }
 
 abstract class TaskDefinitionValidation implements IValidation {
