@@ -690,10 +690,25 @@
     chalk "^4.1.2"
     semver "^7.3.8"
 
-"@jsii/spec@1.80.0", "@jsii/spec@^1.79.0", "@jsii/spec@^1.80.0":
+"@jsii/check-node@1.86.1":
+  version "1.86.1"
+  resolved "https://registry.yarnpkg.com/@jsii/check-node/-/check-node-1.86.1.tgz#ceffe3e06cf8208c2b5a16e60ff55faa72cd79a2"
+  integrity sha512-lxcuw/TgUkh1dD01B39V47pwmF8yWUm8BiQKb0jpOY0xaE9nSlq9kRfTR7XaXu37w59jeYepI5af/GyUf9+TXw==
+  dependencies:
+    chalk "^4.1.2"
+    semver "^7.5.4"
+
+"@jsii/spec@1.80.0":
   version "1.80.0"
   resolved "https://registry.npmjs.org/@jsii/spec/-/spec-1.80.0.tgz"
   integrity sha512-BkRHjwxwnmRRVA0rx3XFH9iPvEF+AvJGq21uic6qT8lWJEpM82aRse6hGHMofJstP1X3ChRmfmg8JELvHB0gzA==
+  dependencies:
+    ajv "^8.12.0"
+
+"@jsii/spec@^1.79.0", "@jsii/spec@^1.80.0", "@jsii/spec@^1.86.1":
+  version "1.86.1"
+  resolved "https://registry.yarnpkg.com/@jsii/spec/-/spec-1.86.1.tgz#0f8911f5d5cfb2606628f143ac7d195b7870c890"
+  integrity sha512-wD0Y0pVg/1jjbZImk2FIuj+YdpwLFEsKCpoC3XKLJyNyUZPSoJzrt3phLV8HRLmH0m52kw6rh044OIowedcc9A==
   dependencies:
     ajv "^8.12.0"
 
@@ -3651,14 +3666,14 @@ jsesc@^2.5.1:
   integrity sha512-OYu7XEzjkCQ3C5Ps3QIZsQfNpqoJyZZA99wd9aWd05NCtC5pWOkShK2mkL6HXQR6/Cy2lbNdPlZBpuQHXE63gA==
 
 jsii-diff@^1.72.0:
-  version "1.80.0"
-  resolved "https://registry.npmjs.org/jsii-diff/-/jsii-diff-1.80.0.tgz"
-  integrity sha512-DUJEmTnp6mhYh6lsOpoGJ5vZFjdWIw9/CM0gO07X1srkzukNiwbMnGP2pAGLPmjEYAJqmAEUOPL7bmLGo2k/dw==
+  version "1.86.1"
+  resolved "https://registry.yarnpkg.com/jsii-diff/-/jsii-diff-1.86.1.tgz#f8f3970a2b341f26f27a629f10c1b3d1196e6dbb"
+  integrity sha512-3rj9iMRcct4sXftSjffKsPJ5SBXWljh6R3in+rDs53VscaT5NTSilnTRu0/wPKbw2DkVtEXZPPqKZjilLH9Yew==
   dependencies:
-    "@jsii/check-node" "1.80.0"
-    "@jsii/spec" "^1.80.0"
+    "@jsii/check-node" "1.86.1"
+    "@jsii/spec" "^1.86.1"
     fs-extra "^10.1.0"
-    jsii-reflect "^1.80.0"
+    jsii-reflect "^1.86.1"
     log4js "^6.9.1"
     yargs "^16.2.0"
 
@@ -3696,16 +3711,16 @@ jsii-pacmak@^1.72.0:
     xmlbuilder "^15.1.1"
     yargs "^16.2.0"
 
-jsii-reflect@^1.79.0, jsii-reflect@^1.80.0:
-  version "1.80.0"
-  resolved "https://registry.npmjs.org/jsii-reflect/-/jsii-reflect-1.80.0.tgz"
-  integrity sha512-ngjaTnRUmE0tLvpidPPQ/npN7f+2a3Cc2viEHMPm1HDfUXD6QNo9x/WkGgat1s5M0JhPjhGWBhvYfIjL4xOG+g==
+jsii-reflect@^1.79.0, jsii-reflect@^1.80.0, jsii-reflect@^1.86.1:
+  version "1.86.1"
+  resolved "https://registry.yarnpkg.com/jsii-reflect/-/jsii-reflect-1.86.1.tgz#5c8dcc79d705885a47e9c57f0d97d71382bda2b1"
+  integrity sha512-Z9Avq431sdwuku+fpC3pM9DngpmbCA2U8QI4Bctg/M4b5PMDuKuMxBWcdAcU/LhtL14lxNZ66Src0hYmNVk4eQ==
   dependencies:
-    "@jsii/check-node" "1.80.0"
-    "@jsii/spec" "^1.80.0"
+    "@jsii/check-node" "1.86.1"
+    "@jsii/spec" "^1.86.1"
     chalk "^4"
     fs-extra "^10.1.0"
-    oo-ascii-tree "^1.80.0"
+    oo-ascii-tree "^1.86.1"
     yargs "^16.2.0"
 
 jsii-rosetta@^1.79.0, jsii-rosetta@^1.80.0:
@@ -4171,10 +4186,10 @@ onetime@^5.1.2:
   dependencies:
     mimic-fn "^2.1.0"
 
-oo-ascii-tree@^1.80.0:
-  version "1.80.0"
-  resolved "https://registry.npmjs.org/oo-ascii-tree/-/oo-ascii-tree-1.80.0.tgz"
-  integrity sha512-jEfsnu53QsI0VcGrbCR9eS8QuuSp6Ddf1oFc3GK9WP6Ao49/dVWwxk4ijk/YyX2HJDluBSM82yez313rzhI7rw==
+oo-ascii-tree@^1.86.1:
+  version "1.86.1"
+  resolved "https://registry.yarnpkg.com/oo-ascii-tree/-/oo-ascii-tree-1.86.1.tgz#ae924ed69d3699c8495ceb1ff36d5c2b2cc76a99"
+  integrity sha512-pM4jJfP+5cWCOqoSN3RUgNNcOPqLYhmwzbw9QOHNZjCWAfrlgq2D/CSxer0vKDDm5AMkCBzlcknxQLKx9zNqXA==
 
 open@^8.4.0:
   version "8.4.2"
@@ -4680,6 +4695,13 @@ semver@^6.0.0, semver@^6.3.0:
   version "6.3.0"
   resolved "https://registry.npmjs.org/semver/-/semver-6.3.0.tgz"
   integrity sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==
+
+semver@^7.5.4:
+  version "7.5.4"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.5.4.tgz#483986ec4ed38e1c6c48c34894a9182dbff68a6e"
+  integrity sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==
+  dependencies:
+    lru-cache "^6.0.0"
 
 shebang-command@^2.0.0:
   version "2.0.0"
