@@ -22,7 +22,7 @@ describe('When misuing the Lumigo trace* methods passing the wrong construct, sh
         new Lumigo({
           lumigoToken: SecretValue.unsafePlainText('xxx'),
         }).traceEverything(f as any as App);
-      }).toThrow('Lumigo.traceEverything needs a App as input; are you maybe looking for Lumigo.traceLambda instead?');
+      }).toThrow('Lumigo.traceEverything needs a App or Stack as input; are you maybe looking for Lumigo.traceLambda instead?');
     });
 
     test('an ECS TaskDefinition', () => {
@@ -33,7 +33,7 @@ describe('When misuing the Lumigo trace* methods passing the wrong construct, sh
         new Lumigo({
           lumigoToken: SecretValue.unsafePlainText('xxx'),
         }).traceEverything(new FargateTaskDefinition(stack, 'TestDefinition', {}) as any as App);
-      }).toThrow('Lumigo.traceEverything needs a App as input; are you maybe looking for Lumigo.traceEcsTaskDefinition instead?');
+      }).toThrow('Lumigo.traceEverything needs a App or Stack as input; are you maybe looking for Lumigo.traceEcsTaskDefinition instead?');
     });
 
     test('an ECS ScheduledTask', () => {
@@ -68,7 +68,7 @@ describe('When misuing the Lumigo trace* methods passing the wrong construct, sh
         new Lumigo({
           lumigoToken: SecretValue.unsafePlainText('xxx'),
         }).traceEverything(scheduledTask as any as App);
-      }).toThrow('Lumigo.traceEverything needs a App as input; are you maybe looking for Lumigo.traceEcsScheduledTask instead?');
+      }).toThrow('Lumigo.traceEverything needs a App or Stack as input; are you maybe looking for Lumigo.traceEcsScheduledTask instead?');
     });
 
     test('an ECS Service', () => {
@@ -100,7 +100,7 @@ describe('When misuing the Lumigo trace* methods passing the wrong construct, sh
         new Lumigo({
           lumigoToken: SecretValue.unsafePlainText('xxx'),
         }).traceEverything(service as any as App);
-      }).toThrow('Lumigo.traceEverything needs a App as input; are you maybe looking for Lumigo.traceEcsService instead?');
+      }).toThrow('Lumigo.traceEverything needs a App or Stack as input; are you maybe looking for Lumigo.traceEcsService instead?');
     });
 
   });

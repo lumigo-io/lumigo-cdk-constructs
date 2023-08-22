@@ -604,6 +604,66 @@ describe('Lambda tracing injection', () => {
 
   });
 
+  describe('with Lumigo to trace everything in a Stack', () => {
+
+    const lumigo = new Lumigo({ lumigoToken: SecretValue.secretsManager('LumigoToken') });
+
+    describe('a single Node.js function', () => {
+
+      test('with no additional arguments', () => {
+        const app = new App();
+
+        const root = new NodejsTestStack(app, 'NodejsTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+        });
+
+        lumigo.traceEverything(root);
+
+        app.synth();
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f).toHaveLumigoLayerInRegion({
+          region: 'eu-central-1',
+          name: 'lumigo-node-tracer',
+        });
+        expect(f).toHaveEnvVarWithValue('AWS_LAMBDA_EXEC_WRAPPER', '/opt/lumigo_wrapper');
+        expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
+      });
+
+    });
+
+    describe('a single Python function', () => {
+
+      test('with no additional arguments', () => {
+        const app = new App();
+
+        const root = new PythonTestStack(app, 'PythonTestStack', {
+          env: {
+            region: 'eu-central-1',
+          },
+        });
+
+        lumigo.traceEverything(root);
+
+        app.synth();
+
+        expect(root.node.children[0]).toBeInstanceOf(Function);
+        const f = root.node.children[0] as Function;
+
+        expect(f).toHaveLumigoLayerInRegion({
+          region: 'eu-central-1', name: 'lumigo-python-tracer',
+        });
+        expect(f).toHaveEnvVarSet('LUMIGO_TRACER_TOKEN');
+      });
+
+    });
+
+  });
+
   describe('with a function environment overriding', () => {
 
     test('the Lumigo layer', () => {

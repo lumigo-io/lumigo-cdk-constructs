@@ -288,7 +288,7 @@ export class Lumigo {
 
   public traceEverything(root: App | Stack, props: LumigoTraceProps = DEFAULT_LUMIGO_TRACE_PROPS) {
     // For the people not using TypeScript, we need to perform some basic type validation
-    assertExpectedConstructType('traceEverything', 'App', root, (c) => c instanceof App);
+    assertExpectedConstructType('traceEverything', 'App or Stack', root, (c) => c instanceof App || c instanceof Stack);
 
     Aspects.of(root).add(this.asAspect(props));
   }
