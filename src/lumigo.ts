@@ -243,6 +243,8 @@ const DEFAULT_TRACE_ECS_TASK_DEFINITION_PROPS: TraceEcsTaskDefinitionProps = {
   lumigoAutoTraceImage: DEFAULT_LUMIGO_INJECTOR_IMAGE_NAME,
 };
 
+const isTrueOrUndefined = (value: boolean | undefined) => value === true || value === undefined;
+
 /**
  * The `Lumigo` class is the entry point for instrumenting workloads deployed via CDK constructs with Lumigo.
  * You usually would need only one instance of `Lumigo` per CDK application.
@@ -341,7 +343,7 @@ export class Lumigo {
 
             lumigo.traceLambda(construct, {
               layerVersion,
-              enableW3CTraceContext: props.lambdaEnableW3CTraceContext === true,
+              enableW3CTraceContext: isTrueOrUndefined(props.lambdaEnableW3CTraceContext),
               applyAutoTraceTag,
               lumigoTag: props.lumigoTag,
             });
@@ -613,7 +615,7 @@ export class Lumigo {
    * a warning will be added to the CloudFormation template.
    */
   public traceLambda(lambda: SupportedLambdaFunction, props: TraceLambdaProps = {
-    enableW3CTraceContext: false,
+    enableW3CTraceContext: true,
     applyAutoTraceTag: true,
   }) {
     // For the people not using TypeScript, we need to perform some basic type validation
@@ -658,7 +660,7 @@ export class Lumigo {
       lambda.node.addValidation(new HasLumigoPythonHandlerInResourceValidation(lambda));
     }
 
-    const enableW3CTraceContext = !!props.enableW3CTraceContext;
+    const enableW3CTraceContext = isTrueOrUndefined(props.enableW3CTraceContext);
     lambda.addEnvironment(LUMIGO_PROPAGATE_W3C_ENV_VAR_NAME, String(enableW3CTraceContext));
 
     lambda.node.addValidation(new HasLumigoPropagateW3CEnvVarValidation(lambda, enableW3CTraceContext));
