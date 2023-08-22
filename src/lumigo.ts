@@ -709,9 +709,10 @@ export class Lumigo {
          * Check if it is enumeration entries that do not
          * exist in the minimum CDK version we support.
          */
-        switch (lambda.runtime.name) {
-          case 'nodejs18.x': return LambdaLayerType.NODE;
-          case 'python3.10': return LambdaLayerType.PYTHON;
+        if (lambda.runtime.name.startsWith('nodejs')) {
+          return LambdaLayerType.NODE;
+        } else if (lambda.runtime.name.startsWith('python3.')) {
+          return LambdaLayerType.PYTHON;
         }
     }
 
