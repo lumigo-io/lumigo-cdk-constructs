@@ -1008,7 +1008,7 @@ class HasExactlyOneLumigoLayerValidation implements IValidation {
     }
 
     const lumigoLayerArns = layers
-      .filter(layer => layer.layerVersionArn.startsWith(`arn:aws:lambda:${this.lambda.env.region!}:114300393969:layer:`))
+      .filter(layer => layer.layerVersionArn.startsWith(`arn:aws:lambda:${this.lambda.env.region!}:114300393969:layer:lumigo-python-tracer`) || layer.layerVersionArn.startsWith(`arn:aws:lambda:${this.lambda.env.region!}:114300393969:layer:lumigo-node-tracer`))
       .map(layer => layer.layerVersionArn);
 
     if (lumigoLayerArns.length > 1) {
