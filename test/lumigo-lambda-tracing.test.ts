@@ -680,7 +680,7 @@ describe('Lambda tracing injection', () => {
 
       expect(() => {
         app.synth();
-      }).toThrowError(/Multiple Lumigo layers found: 'arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:\d+','arn:aws:lambda:eu-central-1:114300393969:layer:000'/);
+      }).toThrowError(/Multiple Lumigo layers found: 'arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:\d+','arn:aws:lambda:eu-central-1:114300393969:layer:lumigo-node-tracer:555'/);
     });
 
     test('the AWS_LAMBDA_EXEC_WRAPPER env var', () => {
@@ -849,7 +849,7 @@ class NodejsTestOverrideLumigoLayerStack extends Stack {
 
     props.lumigo.traceLambda(handler);
 
-    handler.addLayers(LayerVersion.fromLayerVersionArn(handler, 'AdditionaLayer', `arn:aws:lambda:${handler.env.region!}:114300393969:layer:000`));
+    handler.addLayers(LayerVersion.fromLayerVersionArn(handler, 'AdditionaLayer', `arn:aws:lambda:${handler.env.region!}:114300393969:layer:lumigo-node-tracer:555`));
   }
 }
 
