@@ -16,13 +16,13 @@ workflows:
         filters:
           branches:
             only:
-              - main
+            - main
     jobs:
     - update-layers: {}
   manual-update-layers:
     when: << pipeline.parameters.run_update_layers >>
     jobs:
-      - update-layers: {}
+    - update-layers: {}
 
 jobs:
   update-layers:
