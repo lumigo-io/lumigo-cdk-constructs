@@ -11,18 +11,18 @@ parameters:
 workflows:
   scheduled-update-layers:
     triggers:
-    - schedule:
-        cron: "0 0,4,8,12,16,20 * * *"
-        filters:
-          branches:
-            only:
-            - main
+      - schedule:
+          cron: "0 0,4,8,12,16,20 * * *"
+          filters:
+            branches:
+              only:
+                - main
     jobs:
-    - update-layers: {}
+      - update-layers: {}
   manual-update-layers:
     when: << pipeline.parameters.run_update_layers >>
     jobs:
-    - update-layers: {}
+      - update-layers: {}
 
 jobs:
   update-layers:
@@ -76,7 +76,7 @@ jobs:
           name: Push updates to repo
           command: |
             if [ "$(git rev-parse --verify HEAD)" != "${CIRCLE_SHA1}" ]; then
-              git push -q https://${GH_TOKEN}@github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git ${CIRCLE_BRANCH}
+              git push origin ${CIRCLE_BRANCH}
             else
               echo "No changes in pinned versions detected"
             fi
