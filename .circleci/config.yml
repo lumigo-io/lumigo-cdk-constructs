@@ -11,14 +11,14 @@ parameters:
 workflows:
   scheduled-update-layers:
     triggers:
-      - schedule:
-          cron: "0 0,4,8,12,16,20 * * *"
-          filters:
-            branches:
-              only:
-                - main
+    - schedule:
+        cron: "0 0,4,8,12,16,20 * * *"
+        filters:
+          branches:
+            only:
+              - main
     jobs:
-      - update-layers: {}
+    - update-layers: {}
   manual-update-layers:
     when: << pipeline.parameters.run_update_layers >>
     jobs:
