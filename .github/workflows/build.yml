@@ -30,8 +30,8 @@ jobs:
       - name: debug ls
         run: ls -alh
       - name: debug ls dist
-        run: ls -alh dist
-      - name: debug tree dist -a
+        run: ls -alh .
+      - name: debug tree . -a
         run: |-
           sudo apt-get update
           sudo apt-get install -y tree
