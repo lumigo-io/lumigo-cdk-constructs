@@ -24,7 +24,7 @@ jobs:
       - name: Git diff
         run: git diff
       - name: Install dependencies
-        run: yarn install --check-files
+        run: yarn install --check-files --frozen-lockfile
       - name: build
         run: npx projen build
       - name: Git status
