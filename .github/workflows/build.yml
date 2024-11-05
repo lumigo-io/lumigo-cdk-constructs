@@ -35,7 +35,7 @@ jobs:
         run: |-
           sudo apt-get update
           sudo apt-get install -y tree
-          tree dist
+          tree . -a
       - name: Find mutations
         id: self_mutation
         run: |-
