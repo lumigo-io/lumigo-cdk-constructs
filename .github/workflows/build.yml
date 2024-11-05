@@ -102,7 +102,7 @@ jobs:
       - name: Prepare Repository
         run: mv dist .repo
       - name: Install Dependencies
-        run: cd .repo && yarn install --check-files --frozen-lockfile
+        run: cd .repo && yarn install --check-files
       - name: Create js artifact
         run: cd .repo && npx projen package:js
       - name: Collect js Artifact
