@@ -28,7 +28,9 @@ jobs:
       - name: debug ls dist
         run: ls -alh dist
       - name: debug tree dist
-        run: tree dist
+        run: |-
+          apt-get install -y tree
+          tree dist
       - name: Find mutations
         id: self_mutation
         run: |-
