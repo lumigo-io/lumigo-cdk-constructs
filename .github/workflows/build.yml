@@ -27,6 +27,8 @@ jobs:
         run: ls -alh
       - name: debug ls dist
         run: ls -alh dist
+      - name: debug tree dist
+        run: tree dist
       - name: Find mutations
         id: self_mutation
         run: |-
