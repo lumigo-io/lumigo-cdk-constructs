@@ -71,7 +71,7 @@
           "say": "ready to rock! (unpushed commits are under the \"scratch\" branch)"
         }
       ],
-      "condition": "git diff --exit-code > /dev/null"
+      "condition": "git diff --exit-code ':!.github/' > /dev/null"
     },
     "compat": {
       "name": "compat",
@@ -191,7 +191,7 @@
           "spawn": "unbump"
         },
         {
-          "exec": "git diff --ignore-space-at-eol --exit-code"
+          "exec": "git diff --ignore-space-at-eol --exit-code ':!.github/'"
         }
       ]
     },
