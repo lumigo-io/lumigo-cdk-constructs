@@ -49,7 +49,7 @@ jobs:
         id: self_mutation
         run: |-
           git add .
-          git diff --staged --patch --exit-code > .repo.patch || echo "self_mutation_happened=true" >> $GITHUB_OUTPUT
+          git diff --staged --patch --exit-code ':!.github/' > .repo.patch || echo "self_mutation_happened=true" >> $GITHUB_OUTPUT
           cat .repo.patch
       - name: Upload patch
         if: steps.self_mutation.outputs.self_mutation_happened
