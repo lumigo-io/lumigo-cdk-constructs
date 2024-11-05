@@ -39,6 +39,7 @@ jobs:
         if: ${{ steps.git_remote.outputs.latest_commit == github.sha }}
         uses: actions/upload-artifact@v4
         with:
+          include-hidden-files: true
           name: build-artifact
           path: dist
     container:

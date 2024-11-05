@@ -55,6 +55,7 @@ jobs:
         if: steps.self_mutation.outputs.self_mutation_happened
         uses: actions/upload-artifact@v4
         with:
+          include-hidden-files: true
           name: .repo.patch
           path: .repo.patch
       - name: Fail build on mutation
@@ -69,6 +70,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
+          include-hidden-files: true
           name: build-artifact
           path: dist
     container:
