@@ -19,37 +19,15 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-      - name: Git status
-        run: git status
-      - name: Git diff
-        run: git diff
       - name: Install dependencies
         run: yarn install --check-files --frozen-lockfile
       - name: build
         run: npx projen build
-      - name: Git status
-        run: git status
-      - name: Git diff
-        run: git diff
-      - name: debug ls
-        run: ls -alh
-      - name: debug ls dist
-        run: ls -alh .
-      - name: debug tree . -a
-        run: |-
-          sudo apt-get update
-          sudo apt-get install -y tree
-          tree . -a
-      - name: debug tree dist -a
-        run: |-
-          sudo apt-get update
-          sudo apt-get install -y tree
-          tree dist -a
       - name: Find mutations
         id: self_mutation
         run: |-
           git add .
-          git diff --staged --patch --exit-code ':!.github/' > .repo.patch || echo "self_mutation_happened=true" >> $GITHUB_OUTPUT
+          git diff --staged --patch --exit-code > .repo.patch || echo "self_mutation_happened=true" >> $GITHUB_OUTPUT
           cat .repo.patch
       - name: Upload patch
         if: steps.self_mutation.outputs.self_mutation_happened
