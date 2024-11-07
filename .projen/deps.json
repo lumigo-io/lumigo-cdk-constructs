@@ -16,17 +16,17 @@
     },
     {
       "name": "@types/node",
-      "version": "^14",
+      "version": "^16 <= 16.18.78",
       "type": "build"
     },
     {
       "name": "@typescript-eslint/eslint-plugin",
-      "version": "^5",
+      "version": "^7",
       "type": "build"
     },
     {
       "name": "@typescript-eslint/parser",
-      "version": "^5",
+      "version": "^7",
       "type": "build"
     },
     {
@@ -35,12 +35,8 @@
       "type": "build"
     },
     {
-      "name": "constructs",
-      "version": "10.0.5",
-      "type": "build"
-    },
-    {
-      "name": "eslint-import-resolver-node",
+      "name": "commit-and-tag-version",
+      "version": "^12",
       "type": "build"
     },
     {
@@ -58,7 +54,7 @@
     },
     {
       "name": "jest-junit",
-      "version": "^13",
+      "version": "^15",
       "type": "build"
     },
     {
@@ -67,15 +63,12 @@
       "type": "build"
     },
     {
-      "name": "jsii",
-      "type": "build"
-    },
-    {
       "name": "jsii-diff",
       "type": "build"
     },
     {
       "name": "jsii-docgen",
+      "version": "^10.5.0",
       "type": "build"
     },
     {
@@ -83,16 +76,17 @@
       "type": "build"
     },
     {
-      "name": "json-schema",
+      "name": "jsii-rosetta",
+      "version": "1.x",
+      "type": "build"
+    },
+    {
+      "name": "jsii",
+      "version": "1.x",
       "type": "build"
     },
     {
       "name": "projen",
-      "type": "build"
-    },
-    {
-      "name": "standard-version",
-      "version": "^9",
       "type": "build"
     },
     {
