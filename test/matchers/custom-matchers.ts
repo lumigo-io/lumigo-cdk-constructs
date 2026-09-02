@@ -19,6 +19,27 @@ declare global {
   }
 }
 
+/*
+ * Since `aws-cdk-lib` 2.253 the Lambda function keeps its environment variables in an `IMapBox`
+ * and its layers in an `IArrayBox`, neither of which can be read with a plain index. Older
+ * versions use a plain object and a plain array, and we support both.
+ */
+function getEnvVar(func: Function, name: string): { value?: string } | undefined {
+  /* eslint-disable */
+  const environment = (func as any)['environment'];
+  /* eslint-enable */
+
+  return typeof environment.getEntry === 'function' ? environment.getEntry(name) : environment[name];
+}
+
+function getLayers(func: Function): LayerVersion[] {
+  /* eslint-disable */
+  const layers = (func as any)['_layers'];
+  /* eslint-enable */
+
+  return Array.isArray(layers) ? layers : layers.get();
+}
+
 expect.extend({
   toHaveAwsTag(construct: Construct, key: string, value: string) {
     const aspects = Aspects.of(construct);
@@ -78,7 +99,7 @@ expect.extend({
     }
 
     /* eslint-disable */
-    const v = func['environment'][name];
+    const v = getEnvVar(func, name);
     const pass = (!!v && v['value'] == value);
     /* eslint-enable */
 
@@ -103,7 +124,7 @@ expect.extend({
     }
 
     /* eslint-disable */
-    const v = func['environment'][name];
+    const v = getEnvVar(func, name);
     const pass = (!!v && !!v['value']);
     /* eslint-enable */
 
@@ -131,7 +152,7 @@ expect.extend({
     }
 
     /* eslint-disable */
-    const layers: LayerVersion[]  = (func as any)['_layers'];
+    const layers = getLayers(func);
     const pass = (!!layers.find(l => l.layerVersionArn.startsWith(`arn:aws:lambda:${layer.region}:114300393969:layer:${layer.name}:`)));
     /* eslint-enable */
 
@@ -160,7 +181,7 @@ expect.extend({
     }
 
     /* eslint-disable */
-    const layers: LayerVersion[]  = (func as any)['_layers'];
+    const layers = getLayers(func);
     const pass = (!!layers.find(l => l.layerVersionArn.startsWith(`arn:aws:lambda:${layer.region}:114300393969:layer:${layer.name}:${layer.version}`)));
     /* eslint-enable */
 

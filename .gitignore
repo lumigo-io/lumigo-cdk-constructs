@@ -49,4 +49,5 @@ junit.xml
 .jsii
 tsconfig.json
 !/API.md
+!/.github/workflows/cdk-compat.yml
 !/.projenrc.js
