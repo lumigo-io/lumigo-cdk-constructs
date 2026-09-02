@@ -9,7 +9,7 @@ import { Lumigo, DEFAULT_LUMIGO_INJECTOR_IMAGE_NAME } from '../src';
 
 class ApplicationLoadBalancedFargateServiceStack extends Stack {
 
-  readonly taskDefinition: TaskDefinition;
+  readonly taskDefinition: FargateTaskDefinition;
 
   constructor(scope: Construct, id: string, props: StackProps = {}) {
     super(scope, id, props);
@@ -116,12 +116,20 @@ class CheckInjectionOptions {
 
 describe('ECS tracing injection', () => {
 
+  /*
+   * `aws-cdk-lib` is moving these fields from plain arrays to `IArrayBox` containers. A box
+   * reports a `length` but cannot be indexed, so unwrap it before asserting on the contents.
+   */
+  function unbox<T>(value: any): T[] {
+    return Array.isArray(value) ? value : value.get();
+  }
+
   function checkInjectionOccurred(taskDefinition: TaskDefinition, options: CheckInjectionOptions = {}) {
-    const containers: ContainerDefinition[] = (taskDefinition as any).containers;
+    const containers = unbox<ContainerDefinition>((taskDefinition as any).containers);
 
     expect(containers).toHaveLength(2);
 
-    const volumes = (taskDefinition as any).volumes as Volume[];
+    const volumes = unbox<Volume>((taskDefinition as any).volumes);
     expect(volumes).toHaveLength(1);
     expect(volumes[0].name).toBe('lumigo-injector');
     expect(volumes[0].dockerVolumeConfiguration).toBeUndefined();

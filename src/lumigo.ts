@@ -1000,7 +1000,7 @@ class HasExactlyOneLumigoLayerValidation implements IValidation {
 
   public validate(): string[] {
     /* eslint-disable */
-    const layers: LayerVersion[] = (this.lambda as any)['_layers'];
+    const layers = toArray<LayerVersion>((this.lambda as any)['_layers']);
     /* eslint-enable */
 
     if (!layers) {
@@ -1030,7 +1030,7 @@ class HasLumigoTracerEnvVarValidation implements IValidation {
 
   public validate(): string[] {
     /* eslint-disable */
-    const environment = this.lambda['environment'];
+    const environment = toEnvironmentRecord(this.lambda['environment']);
     /* eslint-enable */
 
     if (!environment) {
@@ -1064,7 +1064,7 @@ class HasAwsLambdaExecWrapperEnvVarValidation implements IValidation {
 
   public validate(): string[] {
     /* eslint-disable */
-    const environment = this.lambda['environment'];
+    const environment = toEnvironmentRecord(this.lambda['environment']);
     /* eslint-enable */
 
     if (!environment) {
@@ -1098,7 +1098,7 @@ class HasAwsLambdaOriginalHandlerEnvVarValidation implements IValidation {
 
   public validate(): string[] {
     /* eslint-disable */
-    const environment = this.lambda['environment'];
+    const environment = toEnvironmentRecord(this.lambda['environment']);
     /* eslint-enable */
 
     if (!environment) {
@@ -1134,7 +1134,7 @@ class HasLumigoPropagateW3CEnvVarValidation implements IValidation {
 
   public validate(): string[] {
     /* eslint-disable */
-    const environment = this.lambda['environment'];
+    const environment = toEnvironmentRecord(this.lambda['environment']);
     /* eslint-enable */
 
     if (!environment) {
@@ -1205,10 +1205,49 @@ class UnsupportedLambdaLayerRegion extends Error {
 
 }
 
+/*
+ * Up to `aws-cdk-lib` 2.252 the private `environment` field of a Lambda function is a plain
+ * object keyed by variable name. Since 2.253 it is an `IMapBox` whose `get()` returns a `Map`,
+ * and indexing it returns nothing.
+ */
+function toEnvironmentRecord(environment: any): { [key: string]: { value?: string } } | undefined {
+  if (!environment) {
+    return undefined;
+  }
+
+  const value = typeof environment.get === 'function' ? environment.get() : environment;
+
+  if (value instanceof Map) {
+    return Object.fromEntries(value);
+  }
+
+  return typeof value === 'object' ? value : undefined;
+}
+
+/*
+ * `aws-cdk-lib` is moving the collections we read from plain arrays to `IArrayBox` containers,
+ * one construct at a time, so both shapes occur across the versions we support. A box looks
+ * close enough to an array to be dangerous: its `filter()` returns another box rather than an
+ * array, so read the underlying array through `get()` instead.
+ */
+function toArray<T>(value: any): T[] | undefined {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  const unboxed = value?.get?.();
+
+  return Array.isArray(unboxed) ? unboxed : undefined;
+}
+
 function getTaskDefinitionContainers(taskDefinition: TaskDefinition): ContainerDefinition[] {
-  return (taskDefinition as any).containers as ContainerDefinition[];
+  /* eslint-disable */
+  const containers = (taskDefinition as any).containers ?? (taskDefinition as any)._containers;
+  /* eslint-enable */
+
+  return toArray<ContainerDefinition>(containers) || [];
 }
 
 function getTaskDefinitionVolumes(taskDefinition: TaskDefinition): Volume[] {
-  return (taskDefinition as any).volumes as Volume[] || [];
+  return toArray<Volume>((taskDefinition as any).volumes) || [];
 }

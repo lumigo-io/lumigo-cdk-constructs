@@ -11,12 +11,12 @@
     },
     {
       "name": "@types/jest",
-      "version": "^27",
+      "version": "^29",
       "type": "build"
     },
     {
       "name": "@types/node",
-      "version": "^16 <= 16.18.78",
+      "version": "^20",
       "type": "build"
     },
     {
@@ -31,12 +31,17 @@
     },
     {
       "name": "aws-cdk-lib",
-      "version": "2.42.1",
+      "version": "2.253.0",
       "type": "build"
     },
     {
       "name": "commit-and-tag-version",
       "version": "^12",
+      "type": "build"
+    },
+    {
+      "name": "constructs",
+      "version": "10.5.0",
       "type": "build"
     },
     {
@@ -59,30 +64,32 @@
     },
     {
       "name": "jest",
-      "version": "^27",
+      "version": "^29",
       "type": "build"
     },
     {
       "name": "jsii-diff",
+      "version": "^1.140.0",
       "type": "build"
     },
     {
       "name": "jsii-docgen",
-      "version": "^10.5.0",
+      "version": "^10.12.0",
       "type": "build"
     },
     {
       "name": "jsii-pacmak",
+      "version": "^1.140.0",
       "type": "build"
     },
     {
       "name": "jsii-rosetta",
-      "version": "1.x",
+      "version": "~5.9.0",
       "type": "build"
     },
     {
       "name": "jsii",
-      "version": "1.x",
+      "version": "~5.9.0",
       "type": "build"
     },
     {
@@ -91,22 +98,13 @@
     },
     {
       "name": "ts-jest",
-      "version": "^27",
+      "version": "^29",
       "type": "build"
     },
     {
       "name": "typescript",
+      "version": "~5.9.0",
       "type": "build"
-    },
-    {
-      "name": "@types/babel__traverse",
-      "version": "7.18.2",
-      "type": "override"
-    },
-    {
-      "name": "@types/prettier",
-      "version": "2.6.0",
-      "type": "override"
     },
     {
       "name": "@aws-cdk/aws-lambda-python-alpha",

@@ -481,7 +481,7 @@ new Lumigo(props: LumigoProps)
 
 | **Name** | **Description** |
 | --- | --- |
-| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.asEcsExtension">asEcsExtension</a></code> | This method returns a wrapper that can be used in conjunction with the {@link https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs.TaskDefinition.html#addwbrextensionextension\|TaskDefinition.addExtension} method. The effect is the same as using the {@link Lumigo#traceEcsTaskDefinition} method on the `TaskDefinition` on which you would invoke `TaskDefinition.addExtension`. |
+| <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.asEcsExtension">asEcsExtension</a></code> | This method returns a wrapper that can be used in conjunction with the {@link https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs.TaskDefinition.html#addwbrextensionextension TaskDefinition.addExtension} method. The effect is the same as using the {@link Lumigo#traceEcsTaskDefinition } method on the `TaskDefinition` on which you would invoke `TaskDefinition.addExtension`. |
 | <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceEcsScheduledTask">traceEcsScheduledTask</a></code> | Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided ECS ScheduledTask construct. |
 | <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceEcsService">traceEcsService</a></code> | Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided ECS Service construct. |
 | <code><a href="#@lumigo/cdk-constructs-v2.Lumigo.traceEcsTaskDefinition">traceEcsTaskDefinition</a></code> | Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided `TaskDefinition`. If the ECS workload does not contain Java, Node.js or Python applications, no distributed-tracing data will be reported to Lumigo. |
@@ -497,7 +497,7 @@ new Lumigo(props: LumigoProps)
 public asEcsExtension(): ITaskDefinitionExtension
 ```
 
-This method returns a wrapper that can be used in conjunction with the {@link https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs.TaskDefinition.html#addwbrextensionextension|TaskDefinition.addExtension} method. The effect is the same as using the {@link Lumigo#traceEcsTaskDefinition} method on the `TaskDefinition` on which you would invoke `TaskDefinition.addExtension`.
+This method returns a wrapper that can be used in conjunction with the {@link https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_ecs.TaskDefinition.html#addwbrextensionextension TaskDefinition.addExtension} method. The effect is the same as using the {@link Lumigo#traceEcsTaskDefinition } method on the `TaskDefinition` on which you would invoke `TaskDefinition.addExtension`.
 
 ##### `traceEcsScheduledTask` <a name="traceEcsScheduledTask" id="@lumigo/cdk-constructs-v2.Lumigo.traceEcsScheduledTask"></a>
 
@@ -522,14 +522,14 @@ Apply Lumigo autotracing for Java, Node.js and Python applications deployed thro
 ##### `traceEcsService` <a name="traceEcsService" id="@lumigo/cdk-constructs-v2.Lumigo.traceEcsService"></a>
 
 ```typescript
-public traceEcsService(service: Ec2Service | FargateService | QueueProcessingEc2Service | QueueProcessingFargateService | NetworkLoadBalancedEc2Service | NetworkLoadBalancedFargateService | ApplicationLoadBalancedEc2Service | ApplicationLoadBalancedFargateService | ApplicationMultipleTargetGroupsEc2Service | ApplicationMultipleTargetGroupsFargateService | NetworkMultipleTargetGroupsEc2Service | NetworkMultipleTargetGroupsFargateService, props?: TraceEcsServiceProps): void
+public traceEcsService(service: ApplicationLoadBalancedEc2Service | ApplicationLoadBalancedFargateService | ApplicationMultipleTargetGroupsEc2Service | ApplicationMultipleTargetGroupsFargateService | NetworkLoadBalancedEc2Service | NetworkLoadBalancedFargateService | NetworkMultipleTargetGroupsEc2Service | NetworkMultipleTargetGroupsFargateService | QueueProcessingEc2Service | QueueProcessingFargateService | FargateService | Ec2Service, props?: TraceEcsServiceProps): void
 ```
 
 Apply Lumigo autotracing for Java, Node.js and Python applications deployed through the provided ECS Service construct.
 
 ###### `service`<sup>Required</sup> <a name="service" id="@lumigo/cdk-constructs-v2.Lumigo.traceEcsService.parameter.service"></a>
 
-- *Type:* aws-cdk-lib.aws_ecs.Ec2Service | aws-cdk-lib.aws_ecs.FargateService | aws-cdk-lib.aws_ecs_patterns.QueueProcessingEc2Service | aws-cdk-lib.aws_ecs_patterns.QueueProcessingFargateService | aws-cdk-lib.aws_ecs_patterns.NetworkLoadBalancedEc2Service | aws-cdk-lib.aws_ecs_patterns.NetworkLoadBalancedFargateService | aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedEc2Service | aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedFargateService | aws-cdk-lib.aws_ecs_patterns.ApplicationMultipleTargetGroupsEc2Service | aws-cdk-lib.aws_ecs_patterns.ApplicationMultipleTargetGroupsFargateService | aws-cdk-lib.aws_ecs_patterns.NetworkMultipleTargetGroupsEc2Service | aws-cdk-lib.aws_ecs_patterns.NetworkMultipleTargetGroupsFargateService
+- *Type:* aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedEc2Service | aws-cdk-lib.aws_ecs_patterns.ApplicationLoadBalancedFargateService | aws-cdk-lib.aws_ecs_patterns.ApplicationMultipleTargetGroupsEc2Service | aws-cdk-lib.aws_ecs_patterns.ApplicationMultipleTargetGroupsFargateService | aws-cdk-lib.aws_ecs_patterns.NetworkLoadBalancedEc2Service | aws-cdk-lib.aws_ecs_patterns.NetworkLoadBalancedFargateService | aws-cdk-lib.aws_ecs_patterns.NetworkMultipleTargetGroupsEc2Service | aws-cdk-lib.aws_ecs_patterns.NetworkMultipleTargetGroupsFargateService | aws-cdk-lib.aws_ecs_patterns.QueueProcessingEc2Service | aws-cdk-lib.aws_ecs_patterns.QueueProcessingFargateService | aws-cdk-lib.aws_ecs.FargateService | aws-cdk-lib.aws_ecs.Ec2Service
 
 ---
 
